@@ -24,20 +24,24 @@ export SET_CLOOG_VERSION=0.18.3;
 export SET_ISL_VERSION=0.14;
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 
-# Attempt to speed up compilation by linking everything to /tmp filesystem
+# Attempt to speed up compilation by linking everything to external mounted
+# hdd ext4 filesystem.
 # Also find toolchain root
-if [ -e /tmp/sm-tc ];
-    rm -rf /tmp/sm-tc;
+if [ -e /home/sabermod/sabermod-ext4/sm-tc ];
+then
+    rm -rf /home/sabermod/sabermod-ext4/sm-tc;
 fi;
 cd ../;
 export TOOLCHAIN_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-cd /tmp && ln -s $TOOLCHAIN_ROOT /tmp/sm-tc && cd /tmp/sm-tc;
+cd /home/sabermod/sabermod-ext4 && ln -s $TOOLCHAIN_ROOT /home/sabermod/sabermod-ext4/sm-tc && cd /home/sabermod/sabermod-ext4/sm-tc;
 
 export TOOLCHAIN_ROOT_SYMBOLIC="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
 # Make sure gcc is on the right remote branch 4.9.x
 # Remove all and git reset --hard so there's no conflicts between branches
-cd $TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod && rm -rf * && git reset --hard && git fetch sm $SET_GCC_VERSION && git checkout FETCH_HEAD && cd $TOOLCHAIN_ROOT_SYMBOLIC/build;
+cd $TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod && rm -rf * && git reset --hard && git fetch sm $SET_GCC_VERSION && git checkout FETCH_HEAD && cd$TOOLCHAIN_ROOT_SYMBOLIC/build;
+
+cd $TOOLCHAIN_ROOT_SYMBOLIC/build;
 
 # Build PATH
 export BUILD_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
@@ -125,7 +129,7 @@ then
     sleep 5;
 
     # GCC Build Configuration
-    ./configure $PREFIX $SYSROOT --host=x86_64-linux-gnu --build=x86_64-linux-gnu --target=aarch64-linux-android --program-transform-name='s&^&aarch64-linux-android-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-4.9.x_android-graphite' --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=android --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --enable-threads --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++;
+    ./configure $PREFIX $SYSROOT --host=x86_64-linux-gnu --build=x86_64-linux-gnu --target=aarch64-linux-android --program-transform-name='s&^&aarch64-linux-android-&' --with-gcc-version=SaberMod --with-pkgversion='SaberMod-4.9.x_android-graphite' --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=android --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --enable-threads --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --enable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --enable-libiberty;
 
     # Build the toolchain
     make $MAKE_FLAGS;
