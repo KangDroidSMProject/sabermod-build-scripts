@@ -25,15 +25,17 @@ export SET_ISL_VERSION=0.14;
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 
 # Attempt to speed up compilation by linking everything to external mounted
-# hdd ext4 filesystem.
+# hdd ext4 filesystem.  Note that mountpoint is a empty directory on the internal hdd (sabermod-ext4).
 # Also find toolchain root
-if [ -e /home/sabermod/sabermod-ext4/sm-tc ];
+# First find MY_HOME
+export MY_HOME=~/;
+if [ -e $MY_HOME/sabermod-ext4/sm-tc ];
 then
-    rm -rf /home/sabermod/sabermod-ext4/sm-tc;
+    rm -rf $MY_HOME/sabermod-ext4/sm-tc;
 fi;
 cd ../;
 export TOOLCHAIN_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-cd /home/sabermod/sabermod-ext4 && ln -s $TOOLCHAIN_ROOT /home/sabermod/sabermod-ext4/sm-tc && cd /home/sabermod/sabermod-ext4/sm-tc;
+cd $MY_HOME/sabermod-ext4 && ln -s $TOOLCHAIN_ROOT $MY_HOME/sabermod-ext4/sm-tc && cd $MY_HOME/sabermod-ext4/sm-tc;
 
 export TOOLCHAIN_ROOT_SYMBOLIC="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
