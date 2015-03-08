@@ -28,11 +28,25 @@ export SET_CLOOG_VERSION=0.18.3;
 export SET_ISL_VERSION=0.14;
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 
-# Make sure gcc is on the right remote branch 4.8.x
-cd ../gcc/gcc-SaberMod && rm -rf * && git reset --hard && git fetch sm $SET_GCC_VERSION && git checkout FETCH_HEAD && cd ../../build;
+# Attempt to speed up compilation by linking everything to /tmp filesystem
+# Also find toolchain root
+if [ -e /tmp/sm-tc ];
+then
+    rm -rf /tmp/sm-tc;
+fi;
+cd ../;
+export TOOLCHAIN_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+cd /tmp && ln -s $TOOLCHAIN_ROOT /tmp/sm-tc && cd /tmp/sm-tc;
+
+export TOOLCHAIN_ROOT_SYMBOLIC="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+
+cd $TOOLCHAIN_ROOT_SYMBOLIC/build;
 
 # Build PATH
 export BUILD_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+
+# Make sure gcc is on the right remote branch 4.8.x
+cd $TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod && rm -rf * && git reset --hard && git fetch sm $SET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
 
 # Try to parallelize the build for faster performance.
 JOBS="$(cat /proc/cpuinfo | grep -c processor)";

@@ -28,29 +28,26 @@ export SET_CLOOG_VERSION=0.18.3;
 export SET_ISL_VERSION=0.14;
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 
-# Attempt to speed up compilation by linking everything to external mounted
-# hdd ext4 filesystem.  Note that mountpoint is a empty directory on the internal hdd (sabermod-ext4).
+# Attempt to speed up compilation by linking everything to /tmp filesystem
 # Also find toolchain root
-# First find MY_HOME
-export MY_HOME=~/;
-if [ -e $MY_HOME/sabermod-ext4/sm-tc ];
+if [ -e /tmp/sm-tc ];
 then
-    rm -rf $MY_HOME/sabermod-ext4/sm-tc;
+    rm -rf /tmp/sm-tc;
 fi;
 cd ../;
 export TOOLCHAIN_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-cd $MY_HOME/sabermod-ext4 && ln -s $TOOLCHAIN_ROOT $MY_HOME/sabermod-ext4/sm-tc && cd $MY_HOME/sabermod-ext4/sm-tc;
+cd /tmp && ln -s $TOOLCHAIN_ROOT /tmp/sm-tc && cd /tmp/sm-tc;
 
 export TOOLCHAIN_ROOT_SYMBOLIC="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-
-# Make sure gcc is on the right remote branch 4.9.x
-# Remove all and git reset --hard so there's no conflicts between branches
-cd $TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod && rm -rf * && git reset --hard && git fetch sm $SET_GCC_VERSION && git checkout FETCH_HEAD && cd$TOOLCHAIN_ROOT_SYMBOLIC/build;
 
 cd $TOOLCHAIN_ROOT_SYMBOLIC/build;
 
 # Build PATH
 export BUILD_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+
+# Make sure gcc is on the right remote branch 4.9.x
+# Remove all and git reset --hard so there's no conflicts between branches
+cd $TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod && rm -rf * && git reset --hard && git fetch sm $SET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
 
 # Try to parallelize the build for faster performance.
 JOBS="$(cat /proc/cpuinfo | grep -c processor)";
@@ -150,6 +147,7 @@ then
     then
         ./build-success;
         ./and-makefiles-aarch64;
+        cp $TOOLCHAIN_ROOT_SYMBOLIC/build-scripts/.gitignore $PREFIX_PATH/.gitignore
     else
         ./build-failed;
     fi;
