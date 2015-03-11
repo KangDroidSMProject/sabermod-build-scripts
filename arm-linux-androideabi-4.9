@@ -30,6 +30,7 @@ export SET_CLOOG_VERSION=0.18.3;
 export SET_ISL_VERSION=0.14;
 export SET_HOST_BUILD=x86_64-linux-gnu;
 export SET_TARGET=arm-linux-androideabi;
+export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod";
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 
 # Attempt to speed up compilation by linking everything to /tmp filesystem
@@ -84,13 +85,6 @@ fi;
 
 export GCC_INSTALLED=$PREFIX_PATH/bin/arm-linux-androideabi-gcc;
 
-# sysroot
-cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard && git fetch sm gcc-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR && git checkout FETCH_HEAD && cd $BUILD_PATH;
-export SYSROOT_SRC_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/sysroot/arch-arm;
-export SYSROOT_DEST_PATH=$PREFIX_PATH/arch-arm;
-cp -R $SYSROOT_SRC_PATH -f $SYSROOT_DEST_PATH;
-export SYSROOT=--with-sysroot=$SYSROOT_DEST_PATH;
-
 # Build and install cloog, isl and osl libraries into the toolchain sysroot environment.
 
 # GMP
@@ -98,7 +92,8 @@ cd $TOOLCHAIN_ROOT_SYMBOLIC/gmp/gmp-gnu;
 export GMP_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
 # CLOOG
-export CLOOG_PREFIX_PATH=$SYSROOT_DEST_PATH/usr;
+export CLOOG_PREFIX_PATH=$PREFIX_PATH/cloog;
+mkdir $CLOOG_PREFIX_PATH;
 export CLOOG_PREFIX=--prefix=$CLOOG_PREFIX_PATH;
 
 # Cloog Build Configuration
@@ -116,11 +111,19 @@ rm -rf cloog-isl-uninstalled.pc cloog-isl-uninstalled.sh cloog-isl.pc cloog-isl.
 
 git reset --hard;
 
-# make libs available for ld
-export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
-export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH;
+# sysroot
+cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard && git fetch sm gcc-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR && git checkout FETCH_HEAD && cd $BUILD_PATH;
+export SYSROOT_SRC_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/sysroot/arch-arm;
+export SYSROOT_DEST_PATH=$PREFIX_PATH/arch-arm;
+cp -R $SYSROOT_SRC_PATH -f $SYSROOT_DEST_PATH;
+export SYSROOT=--with-sysroot=$SYSROOT_DEST_PATH;
 
-export CLOOG_INSTALLED=$SYSROOT_LIB_PATH/libcloog-isl.so.4
+# make libs available for ld
+export CLOOG_LIB_PATH=$CLOOG_PREFIX_PATH/lib;
+export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
+export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$CLOOG_LIB_PATH;
+
+export CLOOG_INSTALLED=$CLOOG_LIB_PATH/libcloog-isl.so.4
 export SET_TARGET_BUILD=CLOOG;
 
 cd $BUILD_PATH;
@@ -130,7 +133,7 @@ if [ -e $CLOOG_INSTALLED ];
 then
 
     # Make a system link for older version of libisl using the newer version for older systems
-    cd $SYSROOT_LIB_PATH && ln -s libisl.so.13.1.0 libisl.so.10 && cd $BUILD_PATH;
+    cd $CLOOG_LIB_PATH && ln -s libisl.so.13.1.0 libisl.so.10 && cd $BUILD_PATH;
     ./build-success;
     sleep 5;
 
@@ -149,8 +152,9 @@ then
     if [ -e $GCC_INSTALLED ];
     then
         ./build-success;
-        ./and-makefiles-arm;
-        cp $TOOLCHAIN_ROOT_SYMBOLIC/build-scripts/.gitignore $PREFIX_PATH/.gitignore
+        cp $TOOLCHAIN_ROOT_SYMBOLIC/build-scripts/.gitignore $PREFIX_PATH/.gitignore;
+        cp -R $CLOOG_LIB_PATH/* $PREFIX_PATH/$SET_TARGET_GCC_LIB_PATH;
+        rm -rf $CLOOG_PREFIX_PATH;
     else
         ./build-failed;
     fi;
