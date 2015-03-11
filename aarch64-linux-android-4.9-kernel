@@ -23,13 +23,15 @@
 ###########################################################################
 
 # Some predefined configurations
-export SET_GCC_VERSION=4.9.3;
+export SET_TARGET_GCC_VERSION=4.9.3;
 export SET_TARGET_GCC_MAJOR=4;
 export SET_TARGET_GCC_MINOR=9;
+export SET_SYSTEM_GCC_VERSION=4.9.1;
 export SET_CLOOG_VERSION=0.18.3;
 export SET_ISL_VERSION=0.14;
 export SET_HOST_BUILD=x86_64-linux-gnu;
-export SET_TARGET=arm-eabi;
+export SET_TARGET=aarch64-linux-android;
+export SET_BUILD_TYPE=linux;
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 
 # Attempt to speed up compilation by linking everything to /tmp filesystem
@@ -50,13 +52,14 @@ cd $TOOLCHAIN_ROOT_SYMBOLIC/build;
 export BUILD_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
 # Make sure gcc is on the right remote branch 4.9.x
-cd $TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod && rm -rf * && git reset --hard && git fetch sm $SET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
+# Remove all and git reset --hard so there's no conflicts between branches
+cd $TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod && rm -rf * && git reset --hard && git fetch sm $SET_TARGET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
 
 # Try to parallelize the build for faster performance.
-export JOBS="$(cat /proc/cpuinfo | grep -c processor)";
+JOBS="$(cat /proc/cpuinfo | grep -c processor)";
 
 # Determine Make flags
-export MAKE_FLAGS=-j"$JOBS";
+MAKE_FLAGS=-j"$JOBS"
 
 # Make a clean build
 if [ -e Makefile ];
@@ -71,7 +74,7 @@ then
     rm -rf gmp-gnu;
 fi;
 
-export PREFIX_PATH=~/tmp/$SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR;
+export PREFIX_PATH=~/tmp/$SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR-$SET_BUILD_TYPE;
 export PREFIX=--prefix=$PREFIX_PATH;
 
 if [ -d "$PREFIX_PATH" ];
@@ -84,13 +87,6 @@ fi;
 
 export GCC_INSTALLED=$PREFIX_PATH/bin/$SET_TARGET-gcc;
 
-# sysroot
-cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard && git fetch sm gcc-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR && git checkout FETCH_HEAD && cd $BUILD_PATH;
-export SYSROOT_SRC_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/sysroot/arch-arm;
-export SYSROOT_DEST_PATH=$PREFIX_PATH/arch-arm;
-cp -R $SYSROOT_SRC_PATH -f $SYSROOT_DEST_PATH;
-export SYSROOT=--with-sysroot=$SYSROOT_DEST_PATH;
-
 # Build and install cloog, isl and osl libraries into the toolchain sysroot environment.
 
 # GMP
@@ -98,7 +94,8 @@ cd $TOOLCHAIN_ROOT_SYMBOLIC/gmp/gmp-gnu;
 export GMP_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
 # CLOOG
-export CLOOG_PREFIX_PATH=$SYSROOT_DEST_PATH/usr;
+export CLOOG_PREFIX_PATH=$PREFIX_PATH/arch-arm64/usr;
+mkdir $CLOOG_PREFIX_PATH;
 export CLOOG_PREFIX=--prefix=$CLOOG_PREFIX_PATH;
 
 # Cloog Build Configuration
@@ -117,25 +114,29 @@ rm -rf cloog-isl-uninstalled.pc cloog-isl-uninstalled.sh cloog-isl.pc cloog-isl.
 git reset --hard;
 
 # make libs available for ld
-export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
-export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH;
+export CLOOG_LIB_PATH=$CLOOG_PREFIX_PATH/lib;
 
-export CLOOG_INSTALLED=$SYSROOT_LIB_PATH/libcloog-isl.so.4
+# Export this for host CLOOG
+export SYSROOT_LIB_PATH=$CLOOG_LIB_PATH;
+
+export LD_LIBRARY_PATH=$CLOOG_LIB_PATH:/usr/aarch64-linux-gnu/lib;
+
+export CLOOG_INSTALLED=$CLOOG_LIB_PATH/libcloog-isl.so.4
 export SET_TARGET_BUILD=CLOOG;
 
-cd $BUILD_PATH;
+cd $BUILD_PATH;;
 
 # Did we make it?
 if [ -e $CLOOG_INSTALLED ];
 then
 
     # Make a system link for older version of libisl using the newer version for older systems
-    cd $SYSROOT_LIB_PATH && ln -s libisl.so.13.1.0 libisl.so.10 && cd $BUILD_PATH;
+    cd $CLOOG_LIB_PATH && ln -s libisl.so.13.1.0 libisl.so.10 && cd $BUILD_PATH;;
     ./build-success;
     sleep 5;
 
     # GCC Build Configuration
-    ./configure $PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=android --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-plugins --enable-threads --enable-ld=default --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --disable-bootstrap "--enable-eh-frame-hdr-for-static" --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --with-bugurl=mailto:sabermod.team@gmail.com;
+    ./configure $PREFIX --with-sysroot=/ --host=x86_64-linux-gnu --build=x86_64-linux-gnu --target=$SET_TARGET --program-transform-name='s&^&aarch64-linux-android-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --enable-threads --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=/usr/aarch64-linux-gnu/include/c++/$SET_SYSTEM_GCC_VERSION --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic;
 
     # Build the toolchain
     make $MAKE_FLAGS;
@@ -149,7 +150,10 @@ then
     if [ -e $GCC_INSTALLED ];
     then
         ./build-success;
-        cp $TOOLCHAIN_ROOT_SYMBOLIC/build-scripts/.gitignore $PREFIX_PATH/.gitignore
+        ./and-makefiles-aarch64;
+
+        # Copy prebuilts
+        cp $TOOLCHAIN_ROOT_SYMBOLIC/build-scripts/.gitignore $PREFIX_PATH/.gitignore;
     else
         ./build-failed;
     fi;
@@ -158,3 +162,4 @@ else
 fi;
 
 cd $TOOLCHAIN_ROOT/build-scripts;
+

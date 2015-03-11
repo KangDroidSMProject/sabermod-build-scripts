@@ -29,7 +29,7 @@ export SET_TARGET_GCC_MINOR=9;
 export SET_CLOOG_VERSION=0.18.3;
 export SET_ISL_VERSION=0.14;
 export SET_HOST_BUILD=x86_64-linux-gnu;
-export SET_TARGET=arm-eabi;
+export SET_TARGET=arm-linux-androideabi;
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 
 # Attempt to speed up compilation by linking everything to /tmp filesystem
@@ -53,10 +53,10 @@ export BUILD_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 cd $TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod && rm -rf * && git reset --hard && git fetch sm $SET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
 
 # Try to parallelize the build for faster performance.
-export JOBS="$(cat /proc/cpuinfo | grep -c processor)";
+JOBS="$(cat /proc/cpuinfo | grep -c processor)";
 
 # Determine Make flags
-export MAKE_FLAGS=-j"$JOBS";
+MAKE_FLAGS=-j"$JOBS"
 
 # Make a clean build
 if [ -e Makefile ];
@@ -71,7 +71,7 @@ then
     rm -rf gmp-gnu;
 fi;
 
-export PREFIX_PATH=~/tmp/$SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR;
+export PREFIX_PATH=~/tmp/arm-linux-androideabi-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR;
 export PREFIX=--prefix=$PREFIX_PATH;
 
 if [ -d "$PREFIX_PATH" ];
@@ -82,7 +82,7 @@ else
     mkdir -p $PREFIX_PATH;
 fi;
 
-export GCC_INSTALLED=$PREFIX_PATH/bin/$SET_TARGET-gcc;
+export GCC_INSTALLED=$PREFIX_PATH/bin/arm-linux-androideabi-gcc;
 
 # sysroot
 cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard && git fetch sm gcc-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR && git checkout FETCH_HEAD && cd $BUILD_PATH;
@@ -135,7 +135,7 @@ then
     sleep 5;
 
     # GCC Build Configuration
-    ./configure $PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=android --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-plugins --enable-threads --enable-ld=default --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --disable-bootstrap "--enable-eh-frame-hdr-for-static" --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --with-bugurl=mailto:sabermod.team@gmail.com;
+    ./configure $PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=android --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --with-gold-version=android --enable-gold=default --enable-plugins --enable-threads --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' "--enable-eh-frame-hdr-for-static" --enable-initfini-array --disable-bootstrap --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --disable-libsanitizer --with-bugurl=mailto:sabermod.team@gmail.com;
 
     # Build the toolchain
     make $MAKE_FLAGS;
@@ -149,6 +149,7 @@ then
     if [ -e $GCC_INSTALLED ];
     then
         ./build-success;
+        ./and-makefiles-arm;
         cp $TOOLCHAIN_ROOT_SYMBOLIC/build-scripts/.gitignore $PREFIX_PATH/.gitignore
     else
         ./build-failed;
@@ -158,3 +159,4 @@ else
 fi;
 
 cd $TOOLCHAIN_ROOT/build-scripts;
+
