@@ -138,7 +138,7 @@ then
     sleep 5;
 
     # GCC Build Configuration
-    ./configure $PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=android --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-plugins --enable-threads --enable-ld=default --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --disable-bootstrap "--enable-eh-frame-hdr-for-static" --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --with-bugurl=mailto:sabermod.team@gmail.com;
+    ./configure $PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=android --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-plugins --enable-ld=default --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --disable-bootstrap "--enable-eh-frame-hdr-for-static" --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --with-bugurl=mailto:sabermod.team@gmail.com;
 
     # Build the toolchain
     make $MAKE_FLAGS;
