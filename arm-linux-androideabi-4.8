@@ -152,6 +152,7 @@ then
     if [ -e $GCC_INSTALLED ];
     then
         ./build-success;
+        ./and-makefiles-arm;
         cp $TOOLCHAIN_ROOT_SYMBOLIC/build-scripts/.gitignore $PREFIX_PATH/.gitignore;
         cp -R $CLOOG_LIB_PATH/* $PREFIX_PATH/$SET_TARGET_GCC_LIB_PATH;
         rm -rf $CLOOG_PREFIX_PATH;
