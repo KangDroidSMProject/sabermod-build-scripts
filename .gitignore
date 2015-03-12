@@ -10,3 +10,9 @@ all-5.0
 
 # libtool scripts
 *.la
+
+lib/gcc/aarch64-linux-android/4.9.x-aosp-sabermod/pkgconfig/
+lib/gcc/aarch64-linux-android/4.9.x-sabermod/pkgconfig/
+lib/gcc/aarch64-linux-android/4.8.x-sabermod/pkgconfig/
+lib/gcc/arm-linux-androideabi/4.9.x-sabermod/pkgconfig/
+lib/gcc/arm-linux-androideabi/4.8.x-sabermod/pkgconfig/
