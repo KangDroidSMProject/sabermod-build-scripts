@@ -52,15 +52,14 @@ cd $TOOLCHAIN_ROOT_SYMBOLIC/build;
 # Build PATH
 export BUILD_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
-# Make sure gcc is on the right remote branch 4.8.x
-# Remove all and git reset --hard so there's no conflicts between branches
-cd $TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod && rm -rf * && git reset --hard && git fetch sm $SET_TARGET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
-
 # Try to parallelize the build for faster performance.
 JOBS="$(cat /proc/cpuinfo | grep -c processor)";
 
 # Determine Make flags
 MAKE_FLAGS=-j"$JOBS"
+
+# Set log location
+export MAKE_LOG=$BUILD_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR-$SET_BUILD_TYPE.log;
 
 # Make a clean build
 if [ -e Makefile ];
@@ -69,7 +68,7 @@ then
     make $MAKE_FLAGS distclean;
 fi;
 
-# Remove all untracked files and directories in git
+# untracked files
 if [ -d gmp-gnu ];
 then
     rm -rf gmp-gnu;
@@ -90,10 +89,6 @@ export GCC_INSTALLED=$PREFIX_PATH/bin/$SET_TARGET-gcc;
 
 # Build and install cloog, isl and osl libraries into the toolchain toolchain environment.
 
-# GMP
-cd $TOOLCHAIN_ROOT_SYMBOLIC/gmp/gmp-gnu;
-export GMP_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
-
 # CLOOG
 export CLOOG_PREFIX_PATH=$PREFIX_PATH/cloog;
 mkdir $CLOOG_PREFIX_PATH;
@@ -102,27 +97,28 @@ export CLOOG_PREFIX=--prefix=$CLOOG_PREFIX_PATH;
 # Cloog Build Configuration
 cd $TOOLCHAIN_ROOT_SYMBOLIC/cloog/cloog-$SET_CLOOG_VERSION && ./configure $CLOOG_PREFIX --with-isl=bundled --with-osl=bundled --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
 
-make $MAKE_FLAGS;
-make install;
+echo "";
+echo "";
+echo "";
+echo "Compiling Cloog, and cloog dependencies ...";
+echo "";
+echo "";
+echo "";
+
+make $MAKE_FLAGS -k > $MAKE_LOG 2>&1;
+make install -k >> $MAKE_LOG 2>&1;
 
 # cleanup
-make $MAKE_FLAGS clean;
-make $MAKE_FLAGS distclean;
+make $MAKE_FLAGS clean -k >> $MAKE_LOG 2>&1;
+make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
 
 # untracked files
 rm -rf cloog-isl-uninstalled.pc cloog-isl-uninstalled.sh cloog-isl.pc cloog-isl.pc.in doc/gitversion.texi version.h isl/gitversion.h isl/include/isl/stdint.h isl/isl-uninstalled.pc isl/isl-uninstalled.sh isl/isl.pc isl/isl.pc.in;
 
 git reset --hard;
 
-# make libs available for ld
 export CLOOG_LIB_PATH=$CLOOG_PREFIX_PATH/lib;
-
-# Export this for host CLOOG
-export SYSROOT_LIB_PATH=$CLOOG_LIB_PATH;
-
-export LD_LIBRARY_PATH=$CLOOG_LIB_PATH:/usr/aarch64-linux-gnu/lib;
-
-export CLOOG_INSTALLED=$CLOOG_LIB_PATH/libcloog-isl.so.4
+export CLOOG_INSTALLED=$CLOOG_LIB_PATH/libcloog-isl.so.4;
 export SET_TARGET_BUILD=CLOOG;
 
 cd $BUILD_PATH;
@@ -136,14 +132,31 @@ then
     ./build-success;
     sleep 5;
 
+    echo "Preparing sabermod toolchain sources ...";
+    echo "";
+    echo "";
+    echo "";
+
+    # Make sure gcc is on the right remote branch 4.8.x
+    # Remove all and git reset --hard so there's no conflicts between branches
+    cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard && git fetch sm $SET_TARGET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
+
+    # make libs available for ld
+    export LD_LIBRARY_PATH=$CLOOG_LIB_PATH:/usr/aarch64-linux-gnu/lib;
+
     # GCC Build Configuration
     ./configure $PREFIX --with-sysroot=/ --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-linux-android-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=/usr/aarch64-linux-gnu/include/c++/$SET_SYSTEM_GCC_VERSION --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic;
 
+    echo "";
+    echo "";
+    echo "";
+    echo "Compiling sabermod toolchain $SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR-$SET_BUILD_TYPE ...";
+
     # Build the toolchain
-    make $MAKE_FLAGS;
+    make $MAKE_FLAGS -k >> $MAKE_LOG 2>&1;
 
     # Install the toolchain (twice)
-    make install && make install;
+    make install -k >> $MAKE_LOG 2>&1 && make install -k >> $MAKE_LOG 2>&1;
 
     export SET_TARGET_BUILD=GCC;
 
