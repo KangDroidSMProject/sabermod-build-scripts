@@ -1,0 +1,6 @@
+#!/bin/bash
+
+# Build all aarch64
+cd x86_64;
+bash x86_64-linux-4.9;
+

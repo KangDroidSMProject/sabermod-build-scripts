@@ -34,6 +34,7 @@ export SET_TARGET=aarch64-linux-android;
 export SET_BUILD_TYPE=kernel;
 export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod";
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
+export SABERMOD_BUILD_ARCH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
 # Attempt to speed up compilation by linking everything to /tmp filesystem
 # Also find toolchain root
@@ -41,7 +42,7 @@ if [ -e /tmp/sm-tc ];
 then
     rm -rf /tmp/sm-tc;
 fi;
-cd ../;
+cd ../../;
 export TOOLCHAIN_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 cd /tmp && ln -s $TOOLCHAIN_ROOT /tmp/sm-tc && cd /tmp/sm-tc;
 
@@ -53,10 +54,10 @@ cd $TOOLCHAIN_ROOT_SYMBOLIC/build;
 export BUILD_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
 # Try to parallelize the build for faster performance.
-JOBS="$(cat /proc/cpuinfo | grep -c processor)";
+export JOBS="$(cat /proc/cpuinfo | grep -c processor)";
 
 # Determine Make flags
-MAKE_FLAGS=-j"$JOBS"
+export MAKE_FLAGS=-j"$JOBS"
 
 # Set log location
 export MAKE_LOG=$BUILD_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR-$SET_BUILD_TYPE.log;
@@ -74,23 +75,20 @@ then
     rm -rf gmp-gnu;
 fi;
 
-export PREFIX_PATH=~/tmp/$SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR-$SET_BUILD_TYPE;
-export PREFIX=--prefix=$PREFIX_PATH;
+export TOOLCHAIN_PREFIX_PATH=~/tmp/$SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR-$SET_BUILD_TYPE;
 
-if [ -d "$PREFIX_PATH" ];
+if [ -d "$TOOLCHAIN_PREFIX_PATH" ];
 then
-    rm -rf $PREFIX_PATH;
-    mkdir -p $PREFIX_PATH;
+    rm -rf $TOOLCHAIN_PREFIX_PATH;
+    mkdir -p $TOOLCHAIN_PREFIX_PATH;
 else
-    mkdir -p $PREFIX_PATH;
+    mkdir -p $TOOLCHAIN_PREFIX_PATH;
 fi;
-
-export GCC_INSTALLED=$PREFIX_PATH/bin/$SET_TARGET-gcc;
 
 # Build and install cloog, isl and osl libraries into the toolchain toolchain environment.
 
 # CLOOG
-export CLOOG_PREFIX_PATH=$PREFIX_PATH/cloog;
+export CLOOG_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH/cloog;
 mkdir $CLOOG_PREFIX_PATH;
 export CLOOG_PREFIX=--prefix=$CLOOG_PREFIX_PATH;
 
@@ -144,8 +142,10 @@ then
     # make libs available for ld
     export LD_LIBRARY_PATH=$CLOOG_LIB_PATH:/usr/aarch64-linux-gnu/lib;
 
+    export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
+
     # GCC Build Configuration
-    ./configure $PREFIX --with-sysroot=/ --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-linux-android-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=/usr/aarch64-linux-gnu/include/c++/$SET_SYSTEM_GCC_VERSION --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic;
+    ./configure $TOOLCHAIN_PREFIX --with-sysroot=/ --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-linux-android-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=/usr/aarch64-linux-gnu/include/c++/$SET_SYSTEM_GCC_VERSION --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic;
 
     echo "";
     echo "";
@@ -159,6 +159,7 @@ then
     make install -k >> $MAKE_LOG 2>&1 && make install -k >> $MAKE_LOG 2>&1;
 
     export SET_TARGET_BUILD=GCC;
+    export GCC_INSTALLED=$TOOLCHAIN_PREFIX_PATH/bin/$SET_TARGET-gcc;
 
     # Did we make it?
     if [ -e $GCC_INSTALLED ];
@@ -166,8 +167,8 @@ then
         ./build-success;
 
         # Copy prebuilts
-        cp $TOOLCHAIN_ROOT_SYMBOLIC/build-scripts/.gitignore $PREFIX_PATH/.gitignore;
-        cp -R $CLOOG_LIB_PATH/* $PREFIX_PATH/$SET_TARGET_GCC_LIB_PATH;
+        cp $TOOLCHAIN_ROOT_SYMBOLIC/smbuild/.gitignore $TOOLCHAIN_PREFIX_PATH/.gitignore;
+        cp -R $CLOOG_LIB_PATH/* $TOOLCHAIN_PREFIX_PATH/$SET_TARGET_GCC_LIB_PATH;
         rm -rf $CLOOG_PREFIX_PATH;
     else
         ./build-failed;
@@ -176,5 +177,5 @@ else
     ./build-failed;
 fi;
 
-cd $TOOLCHAIN_ROOT/build-scripts;
+cd $SABERMOD_BUILD_ARCH;
 

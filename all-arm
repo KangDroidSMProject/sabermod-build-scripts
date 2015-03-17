@@ -1,0 +1,86 @@
+#!/bin/bash
+
+# SaberMod Build PATH
+export SABERMOD_BUILD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+
+# Build all aarch64
+cd arm;
+bash arm-eabi-4.8;
+
+# Do not allow all toolchains to compile if any fail.
+# Did we make it?
+if [ -e $GCC_INSTALLED ];
+then
+    CONTINUE=yes;
+else
+    CONTINUE=no;
+fi;
+
+if [ $CONTINUE = yes ];
+then
+    bash arm-eabi-4.9;
+else
+    cd $BUILD_PATH && ./build-failed;
+fi;
+
+# Did we make it?
+if [ -e $GCC_INSTALLED ];
+then
+    CONTINUE=yes;
+else
+    CONTINUE=no;
+fi;
+
+if [ $CONTINUE = yes ];
+then
+    bash arm-eabi-5.0;
+else
+    cd $BUILD_PATH && ./build-failed;
+fi;
+
+# Did we make it?
+if [ -e $GCC_INSTALLED ];
+then
+    CONTINUE=yes;
+else
+    CONTINUE=no;
+fi;
+
+if [ $CONTINUE = yes ];
+then
+    bash arm-linux-androideabi-4.8;
+else
+    cd $BUILD_PATH && ./build-failed;
+fi;
+
+# Did we make it?
+if [ -e $GCC_INSTALLED ];
+then
+    CONTINUE=yes;
+else
+    CONTINUE=no;
+fi;
+
+if [ $CONTINUE = yes ];
+then
+    bash arm-linux-androideabi-4.9;
+else
+    cd $BUILD_PATH && ./build-failed;
+fi;
+
+# Did we make it?
+if [ -e $GCC_INSTALLED ];
+then
+    CONTINUE=yes;
+else
+    CONTINUE=no;
+fi;
+
+if [ $CONTINUE = yes ];
+then
+    bash arm-linux-androideabi-5.0;
+else
+    cd $BUILD_PATH && ./build-failed;
+fi;
+
+cd $SABERMOD_BUILD;
