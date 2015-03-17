@@ -3,7 +3,7 @@
 # SaberMod Build PATH
 export SABERMOD_BUILD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
-# Build all aarch64
+# Build all arm
 cd arm;
 bash arm-eabi-4.8;
 

@@ -82,7 +82,7 @@ else
     mkdir -p $TOOLCHAIN_PREFIX_PATH;
 fi;
 
-# Build and install isl into the toolchain sysroot environment.
+# Build and install isl into the toolchain.
 
 # ISL
 export ISL_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH/isl;
