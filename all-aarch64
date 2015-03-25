@@ -18,6 +18,21 @@ fi;
 
 if [ $CONTINUE = yes ];
 then
+    bash aarch64-linux-android-5.0-kernel;
+else
+    cd $BUILD_PATH && ./build-failed;
+fi;
+
+# Did we make it?
+if [ -e $GCC_INSTALLED ];
+then
+    CONTINUE=yes;
+else
+    CONTINUE=no;
+fi;
+
+if [ $CONTINUE = yes ];
+then
     bash aarch64-linux-android-4.9-ROM;
 else
     cd $BUILD_PATH && ./build-failed;
