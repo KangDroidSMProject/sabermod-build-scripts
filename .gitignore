@@ -1,3 +1,5 @@
+# Universal .gitignore for various SaberMod applications
+
 # Gedit backup files
 *~
 
@@ -17,3 +19,6 @@ lib/gcc/arm-linux-androideabi/4.8.x-sabermod/pkgconfig/
 lib/gcc/arm-eabi/5.0.x-sabermod/pkgconfig/
 lib/gcc/arm-eabi/4.9.x-sabermod/pkgconfig/
 lib/gcc/arm-eabi/4.8.x-sabermod/pkgconfig/
+lib/gcc/arm-linux-gnueabi/5.0.x-sabermod/pkgconfig/
+lib/gcc/arm-linux-gnueabi/4.9.x-sabermod/pkgconfig/
+lib/gcc/arm-linux-gnueabi/4.8.x-sabermod/pkgconfig/
