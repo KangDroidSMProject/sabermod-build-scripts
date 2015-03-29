@@ -91,8 +91,11 @@ export ISL_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH/isl;
 mkdir $ISL_PREFIX_PATH;
 export ISL_PREFIX=--prefix=$ISL_PREFIX_PATH;
 
+# Make sure ISL is on the right gcc5 branch
+cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm gcc5 && git checkout FETCH_HEAD;
+
 # ISL Build Configuration
-cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && ./configure $ISL_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
+./configure $ISL_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
 
 echo "";
 echo "";
