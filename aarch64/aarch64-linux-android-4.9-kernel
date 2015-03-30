@@ -113,6 +113,10 @@ make install -k >> $MAKE_LOG 2>&1;
 # cleanup
 make $MAKE_FLAGS clean -k >> $MAKE_LOG 2>&1;
 make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
+if [ -d autom4te.cache ];
+then
+    rm -rf autom4te.cache;
+fi;
 
 # untracked files
 rm -rf cloog-isl-uninstalled.pc cloog-isl-uninstalled.sh cloog-isl.pc cloog-isl.pc.in doc/gitversion.texi version.h isl/gitversion.h isl/include/isl/stdint.h isl/isl-uninstalled.pc isl/isl-uninstalled.sh isl/isl.pc isl/isl.pc.in;
