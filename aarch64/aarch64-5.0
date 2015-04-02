@@ -23,15 +23,14 @@
 ###########################################################################
 
 # Some predefined configurations
-export SET_TARGET_GCC_VERSION=4.9.3;
-export SET_TARGET_GCC_MAJOR=4;
-export SET_TARGET_GCC_MINOR=9;
+export SET_TARGET_GCC_VERSION=5.0.0;
+export SET_TARGET_GCC_MAJOR=5;
+export SET_TARGET_GCC_MINOR=0;
 export SET_SYSTEM_GCC_VERSION=4.9.1;
-export SET_CLOOG_VERSION=0.18.3;
 export SET_ISL_VERSION=0.14;
 export SET_HOST_BUILD=x86_64-linux-gnu;
-export SET_TARGET=aarch64-linux-android;
-export SET_BUILD_TYPE=kernel;
+export SET_TARGET=aarch64-linux-gnu;
+export SET_TARGET_GCC=aarch64-gcc;
 export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod";
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 export SABERMOD_BUILD_ARCH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
@@ -62,7 +61,7 @@ export JOBS="$(cat /proc/cpuinfo | grep -c processor)";
 export MAKE_FLAGS=-j"$JOBS";
 
 # Set log location
-export MAKE_LOG=$BUILD_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR-$SET_BUILD_TYPE.log;
+export MAKE_LOG=$BUILD_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR.log;
 
 # Make a clean build
 if [ -e Makefile ];
@@ -77,7 +76,7 @@ then
     rm -rf gmp-gnu;
 fi;
 
-export TOOLCHAIN_PREFIX_PATH=~/tmp/$SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR-$SET_BUILD_TYPE;
+export TOOLCHAIN_PREFIX_PATH=~/tmp/$SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR;
 
 if [ -d "$TOOLCHAIN_PREFIX_PATH" ];
 then
@@ -87,23 +86,22 @@ else
     mkdir -p $TOOLCHAIN_PREFIX_PATH;
 fi;
 
-# Build and install cloog, isl and osl libraries into the toolchain.
+# Build and install isl into the toolchain.
 
-# CLOOG
-export CLOOG_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH/cloog;
-mkdir $CLOOG_PREFIX_PATH;
-export CLOOG_PREFIX=--prefix=$CLOOG_PREFIX_PATH;
+# ISL
+export ISL_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH/isl;
+export ISL_PREFIX=--prefix=$ISL_PREFIX_PATH;
 
-# Make sure ISL is on the right master branch
-cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm master && git checkout FETCH_HEAD;
+# Make sure ISL is on the right gcc5 branch
+cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm gcc5 && git checkout FETCH_HEAD;
 
-# Cloog Build Configuration
-cd $TOOLCHAIN_ROOT_SYMBOLIC/cloog/cloog-$SET_CLOOG_VERSION && ./configure $CLOOG_PREFIX --with-isl=bundled --with-osl=bundled --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
+# ISL Build Configuration
+./configure $ISL_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
 
 echo "";
 echo "";
 echo "";
-echo "Compiling Cloog, and cloog dependencies ...";
+echo "Compiling ISL ...";
 echo "";
 echo "";
 echo "";
@@ -114,28 +112,24 @@ make install -k >> $MAKE_LOG 2>&1;
 # cleanup
 make $MAKE_FLAGS clean -k >> $MAKE_LOG 2>&1;
 make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
-if [ -d autom4te.cache ];
-then
-    rm -rf autom4te.cache;
-fi;
 
 # untracked files
-rm -rf cloog-isl-uninstalled.pc cloog-isl-uninstalled.sh cloog-isl.pc cloog-isl.pc.in doc/gitversion.texi version.h isl/gitversion.h isl/include/isl/stdint.h isl/isl-uninstalled.pc isl/isl-uninstalled.sh isl/isl.pc isl/isl.pc.in;
+rm -rf gitversion.h include/isl/stdint.h isl-uninstalled.pc isl-uninstalled.sh isl.pc isl.pc.in;
 
 git reset --hard;
 
-export CLOOG_LIB_PATH=$CLOOG_PREFIX_PATH/lib;
-export CLOOG_INSTALLED=$CLOOG_LIB_PATH/libcloog-isl.so.4;
-export SET_TARGET_BUILD=CLOOG;
+export ISL_LIB_PATH=$ISL_PREFIX_PATH/lib;
+export ISL_INSTALLED=$ISL_LIB_PATH/libisl.so.13.1.0;
+export SET_TARGET_BUILD=ISL;
 
 cd $BUILD_PATH;
 
 # Did we make it?
-if [ -e $CLOOG_INSTALLED ];
+if [ -e $ISL_INSTALLED ];
 then
 
     # Make a system link for older version of libisl using the newer version for older systems
-    cd $CLOOG_LIB_PATH && ln -s libisl.so.13.1.0 libisl.so.10 && cd $BUILD_PATH;
+    cd $ISL_LIB_PATH && ln -s libisl.so.13.1.0 libisl.so.10 && cd $BUILD_PATH;
     ./build-success;
     sleep 5;
 
@@ -144,22 +138,22 @@ then
     echo "";
     echo "";
 
-    # Make sure gcc is on the right remote branch 4.9.x
+    # Make sure gcc is on the right remote branch 5.0.x
     # Remove all and git reset --hard so there's no conflicts between branches
     cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard && git fetch sm $SET_TARGET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
 
     # make libs available for ld
-    export LD_LIBRARY_PATH=$CLOOG_LIB_PATH:/usr/aarch64-linux-gnu/lib;
+    export LD_LIBRARY_PATH=$ISL_LIB_PATH:/usr/aarch64-linux-gnu/lib;
 
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
-    ./configure $TOOLCHAIN_PREFIX --with-sysroot=/ --host=x86_64-linux-gnu --build=x86_64-linux-gnu --target=$SET_TARGET --program-transform-name='s&^&aarch64-linux-android-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=/usr/aarch64-linux-gnu/include/c++/$SET_SYSTEM_GCC_VERSION --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic;
+    ./configure $TOOLCHAIN_PREFIX --with-sysroot=/ --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=/usr/aarch64-linux-gnu/include/c++/$SET_SYSTEM_GCC_VERSION --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic;
 
     echo "";
     echo "";
     echo "";
-    echo "Compiling sabermod toolchain $SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR-$SET_BUILD_TYPE ...";
+    echo "Compiling sabermod toolchain $SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR ...";
 
     # Build the toolchain
     make $MAKE_FLAGS -k >> $MAKE_LOG 2>&1;
@@ -168,17 +162,15 @@ then
     make install -k >> $MAKE_LOG 2>&1 && make install -k >> $MAKE_LOG 2>&1;
 
     export SET_TARGET_BUILD=GCC;
-    export GCC_INSTALLED=$TOOLCHAIN_PREFIX_PATH/bin/$SET_TARGET-gcc;
+    export GCC_INSTALLED=$TOOLCHAIN_PREFIX_PATH/bin/$SET_TARGET_GCC;
 
     # Did we make it?
     if [ -e $GCC_INSTALLED ];
     then
-        ./build-success;
+         ./build-success;
 
-        # Copy prebuilts
+        # Copy .gitignore over
         cp $TOOLCHAIN_ROOT_SYMBOLIC/smbuild/.gitignore $TOOLCHAIN_PREFIX_PATH/.gitignore;
-        cp -R $CLOOG_LIB_PATH/* $TOOLCHAIN_PREFIX_PATH/$SET_TARGET_GCC_LIB_PATH;
-        rm -rf $CLOOG_PREFIX_PATH;
     else
         ./build-failed;
     fi;
@@ -188,5 +180,7 @@ fi;
 
 cd $SABERMOD_BUILD_ARCH;
 
+# Clear variables
 export ENABLE_O3="";
 export ENABLE_PTHREAD="";
+export SET_TARGET_GCC="";

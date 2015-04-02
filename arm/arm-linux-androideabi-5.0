@@ -87,8 +87,7 @@ fi;
 # Build and install isl into the toolchain.
 
 # ISL
-export ISL_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH/isl;
-mkdir $ISL_PREFIX_PATH;
+export ISL_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
 export ISL_PREFIX=--prefix=$ISL_PREFIX_PATH;
 
 # Make sure ISL is on the right gcc5 branch
@@ -174,10 +173,15 @@ then
     if [ -e $GCC_INSTALLED ];
     then
         ./build-success;
-        ./and-makefiles-arm;
+
+        # Copy .gitignore over
         cp $TOOLCHAIN_ROOT_SYMBOLIC/smbuild/.gitignore $TOOLCHAIN_PREFIX_PATH/.gitignore;
-        cp -R $ISL_LIB_PATH/* $TOOLCHAIN_PREFIX_PATH/$SET_TARGET_GCC_LIB_PATH;
-        rm -rf $ISL_PREFIX_PATH;
+
+        # Install android specific files
+        ./and-makefiles-arm;
+
+        # Cleanup sysroot, not needed after toolchain build is complete
+        rm -rf $SYSROOT_DEST_PATH;
     else
         ./build-failed;
     fi;
@@ -187,5 +191,6 @@ fi;
 
 cd $SABERMOD_BUILD_ARCH;
 
+# Clear variables
 export ENABLE_O3="";
 export ENABLE_PTHREAD="";

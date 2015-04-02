@@ -9,16 +9,15 @@
 # libtool scripts
 *.la
 
-# Uneeded toolchain files
-lib/gcc/aarch64-linux-android/4.9.x-aosp-sabermod/pkgconfig/
-lib/gcc/aarch64-linux-android/4.9.x-sabermod/pkgconfig/
-lib/gcc/aarch64-linux-android/4.8.x-sabermod/pkgconfig/
-lib/gcc/arm-linux-androideabi/5.0.x-sabermod/pkgconfig/
-lib/gcc/arm-linux-androideabi/4.9.x-sabermod/pkgconfig/
-lib/gcc/arm-linux-androideabi/4.8.x-sabermod/pkgconfig/
-lib/gcc/arm-eabi/5.0.x-sabermod/pkgconfig/
-lib/gcc/arm-eabi/4.9.x-sabermod/pkgconfig/
-lib/gcc/arm-eabi/4.8.x-sabermod/pkgconfig/
-lib/gcc/arm-linux-gnueabi/5.0.x-sabermod/pkgconfig/
-lib/gcc/arm-linux-gnueabi/4.9.x-sabermod/pkgconfig/
-lib/gcc/arm-linux-gnueabi/4.8.x-sabermod/pkgconfig/
+# Unneeded toolchain files generated from cloog and isl
+*.pc
+*.cmake
+
+# Unneeded directories that take up more space
+arm-linux-android/
+arm-linux-gnueabi/
+arm-linux-androideabi/
+aarch64-elf-linux/
+aarch64-linux-gnu/
+aarch64-linux-android/
+

@@ -89,8 +89,7 @@ fi;
 # Build and install cloog, isl and osl libraries into the toolchain.
 
 # CLOOG
-export CLOOG_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH/cloog;
-mkdir $CLOOG_PREFIX_PATH;
+export CLOOG_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
 export CLOOG_PREFIX=--prefix=$CLOOG_PREFIX_PATH;
 
 # Make sure ISL is on the right master branch
@@ -180,9 +179,12 @@ then
     if [ -e $GCC_INSTALLED ];
     then
         ./build-success;
+
+        # Copy .gitignore over
         cp $TOOLCHAIN_ROOT_SYMBOLIC/smbuild/.gitignore $TOOLCHAIN_PREFIX_PATH/.gitignore;
-        cp -R $CLOOG_LIB_PATH/* $TOOLCHAIN_PREFIX_PATH/$SET_TARGET_GCC_LIB_PATH;
-        rm -rf $CLOOG_PREFIX_PATH;
+
+        # Cleanup sysroot, not needed after toolchain build is complete
+        rm -rf $SYSROOT_DEST_PATH;
     else
         ./build-failed;
     fi;
@@ -192,5 +194,7 @@ fi;
 
 cd $SABERMOD_BUILD_ARCH;
 
+# Clear variables
 export ENABLE_O3="";
 export ENABLE_PTHREAD="";
+export SET_TARGET_GCC="";
