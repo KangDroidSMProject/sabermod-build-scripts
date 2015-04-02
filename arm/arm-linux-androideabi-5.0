@@ -32,6 +32,8 @@ export SET_TARGET=arm-linux-androideabi;
 export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod";
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 export SABERMOD_BUILD_ARCH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+export ENABLE_O3="-O3";
+export ENABLE_PTHREAD="-pthread";
 
 # Attempt to speed up compilation by linking everything to /tmp filesystem
 # Also find toolchain root
@@ -184,3 +186,6 @@ else
 fi;
 
 cd $SABERMOD_BUILD_ARCH;
+
+export ENABLE_O3="";
+export ENABLE_PTHREAD="";
