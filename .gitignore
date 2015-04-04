@@ -6,18 +6,3 @@
 # nano save
 *.save
 
-# libtool scripts
-*.la
-
-# Unneeded toolchain files generated from cloog and isl
-*.pc
-*.cmake
-
-# Unneeded directories that take up more space
-arm-linux-android/
-arm-linux-gnueabi/
-arm-linux-androideabi/
-aarch64-elf-linux/
-aarch64-linux-gnu/
-aarch64-linux-android/
-

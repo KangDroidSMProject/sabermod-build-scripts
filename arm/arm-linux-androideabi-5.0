@@ -174,14 +174,24 @@ then
     then
         ./build-success;
 
-        # Copy .gitignore over
-        cp $TOOLCHAIN_ROOT_SYMBOLIC/smbuild/.gitignore $TOOLCHAIN_PREFIX_PATH/.gitignore;
-
         # Install android specific files
         ./and-makefiles-arm;
 
-        # Cleanup sysroot, not needed after toolchain build is complete
+        # Cleanup
         rm -rf $SYSROOT_DEST_PATH;
+        rm -rf $TOOLCHAIN_PREFIX_PATH/arm-linux-android;
+        for la in `find $TOOLCHAIN_PREFIX_PATH -name *.la`;
+        do
+            rm $la;
+        done;
+        for pc in `find $TOOLCHAIN_PREFIX_PATH -name *.pc`;
+        do
+            rm $pc;
+        done;
+        for cmake in `find $TOOLCHAIN_PREFIX_PATH -name *.cmake`;
+        do
+            rm $cmake;
+        done;
     else
         ./build-failed;
     fi;
