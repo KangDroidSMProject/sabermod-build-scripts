@@ -176,7 +176,7 @@ then
 
         # Cleanup
         rm -rf $SYSROOT_DEST_PATH;
-        rm -rf $$TOOLCHAIN_PREFIX_PATH/aarch64-elf-linux;
+        rm -rf $TOOLCHAIN_PREFIX_PATH/aarch64-elf-linux;
         for la in `find $TOOLCHAIN_PREFIX_PATH -name *.la`;
         do
             rm $la;
