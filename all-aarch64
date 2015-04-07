@@ -5,7 +5,7 @@ export SABERMOD_BUILD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
 # Build all aarch64
 cd aarch64;
-bash aarch64-linux-android-4.9-kernel;
+bash aarch64-4.9;
 
 # Do not allow all toolchains to compile if any fail.
 # Did we make it?
@@ -18,7 +18,7 @@ fi;
 
 if [ $CONTINUE = yes ];
 then
-    bash aarch64-linux-android-5.0-kernel;
+    bash aarch64-5.0;
 else
     cd $BUILD_PATH && ./build-failed;
 fi;
@@ -33,7 +33,7 @@ fi;
 
 if [ $CONTINUE = yes ];
 then
-    bash aarch64-linux-android-4.9-ROM;
+    bash aarch64-linux-android-4.9;
 else
     cd $BUILD_PATH && ./build-failed;
 fi;
