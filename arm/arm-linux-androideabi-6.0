@@ -23,13 +23,12 @@
 ###########################################################################
 
 # Some predefined configurations
-export SET_GCC_VERSION=5.0.1;
-export SET_TARGET_GCC_MAJOR=5;
+export SET_GCC_VERSION=6.0.0;
+export SET_TARGET_GCC_MAJOR=6;
 export SET_TARGET_GCC_MINOR=0;
 export SET_ISL_VERSION=0.14;
 export SET_HOST_BUILD=x86_64-linux-gnu;
-export SET_TARGET=arm-linux-gnueabi;
-export SET_TARGET_GCC=arm-eabi-gcc;
+export SET_TARGET=arm-linux-androideabi;
 export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod";
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 export SABERMOD_BUILD_ARCH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
@@ -75,7 +74,7 @@ then
     rm -rf gmp-gnu;
 fi;
 
-export TOOLCHAIN_PREFIX_PATH=~/tmp/$SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR;
+export TOOLCHAIN_PREFIX_PATH=~/tmp/arm-linux-androideabi-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR;
 
 if [ -d "$TOOLCHAIN_PREFIX_PATH" ];
 then
@@ -113,7 +112,7 @@ make $MAKE_FLAGS clean -k >> $MAKE_LOG 2>&1;
 make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
 
 # untracked files
-rm -rf gitversion.h include/isl/stdint.h isl-uninstalled.pc isl-uninstalled.sh isl.pc isl.pc.in;
+rm -rf gitversion.h include/isl/stdint.h isl-uninstalled.pc isl-uninstalled.sh isl.pc isl/isl.pc.in;
 
 git reset --hard;
 
@@ -138,13 +137,13 @@ then
     echo "";
 
     # sysroot
-    cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard && git fetch sm gcc-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR && git checkout FETCH_HEAD && cd $BUILD_PATH;
+    cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard && git fetch sm gcc-5.0 && git checkout FETCH_HEAD && cd $BUILD_PATH;
     export SYSROOT_SRC_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/sysroot/arch-arm;
     export SYSROOT_DEST_PATH=$TOOLCHAIN_PREFIX_PATH/arch-arm;
     cp -R $SYSROOT_SRC_PATH -f $SYSROOT_DEST_PATH;
     export SYSROOT=--with-sysroot=$SYSROOT_DEST_PATH;
 
-    # Make sure gcc is on the right remote branch 5.0.x
+    # Make sure gcc is on the right remote branch 6.0.x
     cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard && git fetch smhub $SET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
 
     # make libs available for ld
@@ -154,7 +153,7 @@ then
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
-    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=android --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-plugins --enable-ld=default --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --disable-bootstrap "--enable-eh-frame-hdr-for-static" --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --with-bugurl=mailto:sabermod.team@gmail.com --disable-libquadmath --disable-libatomic --disable-libgomp --disable-libsanitizer;
+    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=android --with-mpc-version=gnu --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --with-gold-version=android --enable-gold=default --enable-plugins --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' "--enable-eh-frame-hdr-for-static" --enable-initfini-array --disable-bootstrap --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --disable-libsanitizer --with-bugurl=mailto:sabermod.team@gmail.com;
 
     echo "";
     echo "";
@@ -168,12 +167,15 @@ then
     make install -k >> $MAKE_LOG 2>&1 && make install -k >> $MAKE_LOG 2>&1;
 
     export SET_TARGET_BUILD=GCC;
-    export GCC_INSTALLED=$TOOLCHAIN_PREFIX_PATH/bin/$SET_TARGET_GCC;
+    export GCC_INSTALLED=$TOOLCHAIN_PREFIX_PATH/bin/$SET_TARGET-gcc;
 
     # Did we make it?
     if [ -e $GCC_INSTALLED ];
     then
         ./build-success;
+
+        # Install android specific files
+        ./and-makefiles-arm;
 
         # Cleanup
         rm -rf $SYSROOT_DEST_PATH;
@@ -201,4 +203,3 @@ cd $SABERMOD_BUILD_ARCH;
 # Clear variables
 export ENABLE_O3="";
 export ENABLE_PTHREAD="";
-export SET_TARGET_GCC="";

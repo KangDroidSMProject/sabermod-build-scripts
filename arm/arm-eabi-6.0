@@ -23,8 +23,8 @@
 ###########################################################################
 
 # Some predefined configurations
-export SET_GCC_VERSION=5.0.1;
-export SET_TARGET_GCC_MAJOR=5;
+export SET_GCC_VERSION=6.0.0;
+export SET_TARGET_GCC_MAJOR=6;
 export SET_TARGET_GCC_MINOR=0;
 export SET_ISL_VERSION=0.14;
 export SET_HOST_BUILD=x86_64-linux-gnu;
@@ -138,13 +138,13 @@ then
     echo "";
 
     # sysroot
-    cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard && git fetch sm gcc-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR && git checkout FETCH_HEAD && cd $BUILD_PATH;
+    cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard && git fetch sm gcc-5.0 && git checkout FETCH_HEAD && cd $BUILD_PATH;
     export SYSROOT_SRC_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/sysroot/arch-arm;
     export SYSROOT_DEST_PATH=$TOOLCHAIN_PREFIX_PATH/arch-arm;
     cp -R $SYSROOT_SRC_PATH -f $SYSROOT_DEST_PATH;
     export SYSROOT=--with-sysroot=$SYSROOT_DEST_PATH;
 
-    # Make sure gcc is on the right remote branch 5.0.x
+    # Make sure gcc is on the right remote branch 6.0.x
     cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard && git fetch smhub $SET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
 
     # make libs available for ld

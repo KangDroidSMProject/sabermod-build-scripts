@@ -48,6 +48,21 @@ fi;
 
 if [ $CONTINUE = yes ];
 then
+    bash arm-eabi-6.0;
+else
+    cd $BUILD_PATH && ./build-failed;
+fi;
+
+# Did we make it?
+if [ -e $GCC_INSTALLED ];
+then
+    CONTINUE=yes;
+else
+    CONTINUE=no;
+fi;
+
+if [ $CONTINUE = yes ];
+then
     bash arm-linux-androideabi-4.8;
 else
     cd $BUILD_PATH && ./build-failed;
