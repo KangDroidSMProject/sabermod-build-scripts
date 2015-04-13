@@ -61,11 +61,4 @@ else
     CONTINUE=no;
 fi;
 
-if [ $CONTINUE = yes ];
-then
-    bash arm-linux-androideabi-4.9;
-else
-    cd $BUILD_PATH && ./build-failed;
-fi;
-
 cd $SABERMOD_BUILD;
