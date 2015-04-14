@@ -23,7 +23,7 @@
 ###########################################################################
 
 # Some predefined configurations
-export SET_TARGET_GCC_VERSION=5.0.0;
+export SET_TARGET_GCC_VERSION=5.0.1;
 export SET_TARGET_GCC_MAJOR=5;
 export SET_TARGET_GCC_MINOR=0;
 export SET_SYSTEM_GCC_VERSION=4.9.1;
@@ -89,7 +89,7 @@ fi;
 # Build and install isl into the toolchain.
 
 # ISL
-export ISL_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH/isl;
+export ISL_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
 export ISL_PREFIX=--prefix=$ISL_PREFIX_PATH;
 
 # Make sure ISL is on the right gcc5 branch

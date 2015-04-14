@@ -89,7 +89,7 @@ fi;
 # Build and install isl into the toolchain.
 
 # ISL
-export ISL_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH/isl;
+export ISL_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
 export ISL_PREFIX=--prefix=$ISL_PREFIX_PATH;
 
 # Make sure ISL is on the right gcc5 branch
