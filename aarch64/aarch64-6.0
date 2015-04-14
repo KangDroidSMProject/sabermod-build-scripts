@@ -194,6 +194,6 @@ fi;
 cd $SABERMOD_BUILD_ARCH;
 
 # Clear variables
-export ENABLE_O3="";
-export ENABLE_PTHREAD="";
-export SET_TARGET_GCC="";
+unset ENABLE_O3;
+unset ENABLE_PTHREAD;
+unset SET_TARGET_GCC;
