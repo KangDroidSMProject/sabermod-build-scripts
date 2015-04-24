@@ -23,9 +23,9 @@
 ###########################################################################
 
 # Some predefined configurations
-export SET_GCC_VERSION=5.0.1;
+export SET_GCC_VERSION=5.1.1;
 export SET_TARGET_GCC_MAJOR=5;
-export SET_TARGET_GCC_MINOR=0;
+export SET_TARGET_GCC_MINOR=1;
 export SET_ISL_VERSION=0.14;
 export SET_HOST_BUILD=x86_64-linux-gnu;
 export SET_TARGET=arm-linux-androideabi;
@@ -143,7 +143,7 @@ then
     cp -R $SYSROOT_SRC_PATH -f $SYSROOT_DEST_PATH;
     export SYSROOT=--with-sysroot=$SYSROOT_DEST_PATH;
 
-    # Make sure gcc is on the right remote branch 5.0.x
+    # Make sure gcc is on the right remote branch 5.1.x
     cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard && git fetch smhub $SET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
 
     # make libs available for ld

@@ -23,9 +23,9 @@
 ###########################################################################
 
 # Some predefined configurations
-export SET_TARGET_GCC_VERSION=5.0.1;
+export SET_TARGET_GCC_VERSION=5.1.1;
 export SET_TARGET_GCC_MAJOR=5;
-export SET_TARGET_GCC_MINOR=0;
+export SET_TARGET_GCC_MINOR=1;
 export SET_SYSTEM_GCC_VERSION=4.9.1;
 export SET_ISL_VERSION=0.14;
 export SET_HOST_BUILD=x86_64-linux-gnu;
@@ -138,7 +138,7 @@ then
     echo "";
     echo "";
 
-    # Make sure gcc is on the right remote branch 5.0.x
+    # Make sure gcc is on the right remote branch 5.1.x
     # Remove all and git reset --hard so there's no conflicts between branches
     cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard && git fetch smhub $SET_TARGET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
 

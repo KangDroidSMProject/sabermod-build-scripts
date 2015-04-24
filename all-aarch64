@@ -18,7 +18,7 @@ fi;
 
 if [ $CONTINUE = yes ];
 then
-    bash aarch64-5.0;
+    bash aarch64-5.1;
 else
     cd $BUILD_PATH && ./build-failed;
 fi;
