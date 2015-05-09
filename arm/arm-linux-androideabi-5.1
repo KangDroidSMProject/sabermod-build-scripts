@@ -130,7 +130,7 @@ if [ -e $ISL_INSTALLED ];
 then
 
     # Make a system link for older version of libisl using the newer version for older systems
-    cd $CLOOG_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.10 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.0 && cd $BUILD_PATH;
+    cd $ISL_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.10 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.0 && cd $BUILD_PATH;
     ./build-success;
     sleep 5;
 
