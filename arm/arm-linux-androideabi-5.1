@@ -26,7 +26,7 @@
 export SET_GCC_VERSION=5.1.1;
 export SET_TARGET_GCC_MAJOR=5;
 export SET_TARGET_GCC_MINOR=1;
-export SET_ISL_VERSION=0.14.1;
+export SET_ISL_VERSION=0.14.x;
 export SET_HOST_BUILD=x86_64-linux-gnu;
 export SET_TARGET=arm-linux-androideabi;
 export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod";
@@ -93,8 +93,8 @@ fi;
 export ISL_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
 export ISL_PREFIX=--prefix=$ISL_PREFIX_PATH;
 
-# Make sure ISL is on the right gcc5 branch
-cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm gcc5 && git checkout FETCH_HEAD;
+# Make sure ISL is on the right master branch
+cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm master && git checkout FETCH_HEAD;
 
 # ISL Build Configuration
 ./configure $ISL_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
