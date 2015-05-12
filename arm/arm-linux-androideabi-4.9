@@ -125,6 +125,7 @@ rm -rf cloog-isl-uninstalled.pc cloog-isl-uninstalled.sh cloog-isl.pc cloog-isl.
 git reset --hard;
 
 export CLOOG_LIB_PATH=$CLOOG_PREFIX_PATH/lib;
+export CLOOG_INC_PATH=$CLOOG_PREFIX_PATH/include;
 export CLOOG_INSTALLED=$CLOOG_LIB_PATH/libcloog-isl.so.4;
 export SET_TARGET_BUILD=CLOOG;
 
@@ -157,7 +158,7 @@ then
     # make libs available for ld
     export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
     export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$CLOOG_LIB_PATH;
-
+    export C_INCLUDE_PATH=$SYSROOT_LIB_PATH:$CLOOG_INC_PATH;
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
@@ -213,3 +214,5 @@ unset ENABLE_O3;
 unset ENABLE_PTHREAD;
 unset gcc_cv_use_emutls;
 unset libgomp_cv_have_attribute_visibility;
+unset LD_LIBRARY_PATH;
+unset C_INCLUDE_PATH;

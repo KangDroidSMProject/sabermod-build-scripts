@@ -120,6 +120,7 @@ rm -rf gitversion.h include/isl/stdint.h isl-uninstalled.pc isl-uninstalled.sh i
 git reset --hard;
 
 export ISL_LIB_PATH=$ISL_PREFIX_PATH/lib;
+export ISL_INC_PATH=$ISL_PREFIX_PATH/include;
 export ISL_INSTALLED=$ISL_LIB_PATH/libisl.so.$TARGET_ISL_LIB_VERSION;
 export SET_TARGET_BUILD=ISL;
 
@@ -152,7 +153,7 @@ then
     # make libs available for ld
     export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
     export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$ISL_LIB_PATH;
-
+    export C_INCLUDE_PATH=$SYSROOT_LIB_PATH:$ISL_INC_PATH;
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
@@ -208,3 +209,5 @@ unset ENABLE_O3;
 unset ENABLE_PTHREAD;
 unset gcc_cv_use_emutls;
 unset libgomp_cv_have_attribute_visibility;
+unset LD_LIBRARY_PATH;
+unset C_INCLUDE_PATH;
