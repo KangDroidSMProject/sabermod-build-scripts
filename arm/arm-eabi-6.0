@@ -86,17 +86,24 @@ else
     mkdir -p $TOOLCHAIN_PREFIX_PATH;
 fi;
 
+# Path for host libs and includes
+export HOST_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
+export HOST_LIB_PATH=$HOST_PREFIX_PATH/lib;
+export HOST_INC_PATH=$HOST_PREFIX_PATH/include;
+export HOST_PREFIX=--prefix=$HOST_PREFIX_PATH;
+export ISL_INSTALLED=$HOST_LIB_PATH/libisl.so.$TARGET_ISL_LIB_VERSION;
+export MPFR_INSTALLED=$HOST_LIB_PATH/libmpfr.so.6;
+export SET_TARGET_BUILD=HOST;
+
 # Build and install isl into the toolchain.
 
 # ISL
-export ISL_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
-export ISL_PREFIX=--prefix=$ISL_PREFIX_PATH;
 
 # Make sure ISL is on the right master branch
 cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm master && git checkout FETCH_HEAD;
 
 # ISL Build Configuration
-./configure $ISL_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
+./configure $HOST_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
 
 echo "";
 echo "";
@@ -118,19 +125,38 @@ rm -rf gitversion.h include/isl/stdint.h isl-uninstalled.pc isl-uninstalled.sh i
 
 git reset --hard;
 
-export ISL_LIB_PATH=$ISL_PREFIX_PATH/lib;
-export ISL_INC_PATH=$ISL_PREFIX_PATH/include;
-export ISL_INSTALLED=$ISL_LIB_PATH/libisl.so.$TARGET_ISL_LIB_VERSION;
-export SET_TARGET_BUILD=ISL;
+# Build and install mpfr libraries into the toolchain.
+
+# MPFR Build Configuration
+cd $TOOLCHAIN_ROOT_SYMBOLIC/mpfr/mpfr-gnu && ./configure $HOST_PREFIX --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
+
+echo "";
+echo "";
+echo "";
+echo "Compiling MPFR dependencies ...";
+echo "";
+echo "";
+echo "";
+
+make $MAKE_FLAGS -k >> $MAKE_LOG 2>&1;
+make install -k >> $MAKE_LOG 2>&1;
+
+# cleanup
+make $MAKE_FLAGS clean -k >> $MAKE_LOG 2>&1;
+make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
+if [ -d autom4te.cache ];
+then
+    rm -rf autom4te.cache;
+fi;
 
 cd $BUILD_PATH;
 
 # Did we make it?
-if [ -e $ISL_INSTALLED ];
+if [ -e $ISL_INSTALLED ] && [ -e $MPFR_INSTALLED ];
 then
 
     # Make a system link for older version of libisl using the newer version for older systems
-    cd $ISL_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.0 && cd $BUILD_PATH;
+    cd $HOST_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.0 && cd $BUILD_PATH;
     ./build-success;
     sleep 5;
 
@@ -151,8 +177,8 @@ then
 
     # make libs available for ld
     export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
-    export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$ISL_LIB_PATH;
-    export C_INCLUDE_PATH=$SYSROOT_LIB_PATH:$ISL_INC_PATH;
+    export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$HOST_LIB_PATH;
+    export C_INCLUDE_PATH=$HOST_INC_PATH;
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration

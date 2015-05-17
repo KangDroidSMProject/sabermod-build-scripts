@@ -32,10 +32,13 @@ export SET_HOST_BUILD=x86_64-linux-gnu;
 export SET_TARGET=aarch64-linux-gnu;
 export SET_TARGET_GCC=aarch64-gcc;
 export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod";
+export TARGET_ISL_LIB_VERSION=13.1.1;
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 export SABERMOD_BUILD_ARCH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 export ENABLE_O3="-O3";
 export ENABLE_PTHREAD="-pthread";
+export gcc_cv_use_emutls=yes;
+export libgomp_cv_have_attribute_visibility=yes;
 
 # Attempt to speed up compilation by linking everything to /tmp filesystem
 # Also find toolchain root
@@ -86,17 +89,24 @@ else
     mkdir -p $TOOLCHAIN_PREFIX_PATH;
 fi;
 
+# Path for host libs and includes
+export HOST_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
+export HOST_LIB_PATH=$HOST_PREFIX_PATH/lib;
+export HOST_INC_PATH=$HOST_PREFIX_PATH/include;
+export HOST_PREFIX=--prefix=$HOST_PREFIX_PATH;
+export ISL_INSTALLED=$HOST_LIB_PATH/libisl.so.$TARGET_ISL_LIB_VERSION;
+export MPFR_INSTALLED=$HOST_LIB_PATH/libmpfr.so.6;
+export SET_TARGET_BUILD=HOST;
+
 # Build and install isl into the toolchain.
 
 # ISL
-export ISL_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
-export ISL_PREFIX=--prefix=$ISL_PREFIX_PATH;
 
 # Make sure ISL is on the right master branch
 cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm master && git checkout FETCH_HEAD;
 
 # ISL Build Configuration
-./configure $ISL_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
+./configure $HOST_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
 
 echo "";
 echo "";
@@ -118,18 +128,38 @@ rm -rf gitversion.h include/isl/stdint.h isl-uninstalled.pc isl-uninstalled.sh i
 
 git reset --hard;
 
-export ISL_LIB_PATH=$ISL_PREFIX_PATH/lib;
-export ISL_INSTALLED=$ISL_LIB_PATH/libisl.so.13.1.0;
-export SET_TARGET_BUILD=ISL;
+# Build and install mpfr libraries into the toolchain.
+
+# MPFR Build Configuration
+cd $TOOLCHAIN_ROOT_SYMBOLIC/mpfr/mpfr-gnu && ./configure $HOST_PREFIX --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
+
+echo "";
+echo "";
+echo "";
+echo "Compiling MPFR dependencies ...";
+echo "";
+echo "";
+echo "";
+
+make $MAKE_FLAGS -k >> $MAKE_LOG 2>&1;
+make install -k >> $MAKE_LOG 2>&1;
+
+# cleanup
+make $MAKE_FLAGS clean -k >> $MAKE_LOG 2>&1;
+make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
+if [ -d autom4te.cache ];
+then
+    rm -rf autom4te.cache;
+fi;
 
 cd $BUILD_PATH;
 
 # Did we make it?
-if [ -e $ISL_INSTALLED ];
+if [ -e $ISL_INSTALLED ] && [ -e $MPFR_INSTALLED ];
 then
 
     # Make a system link for older version of libisl using the newer version for older systems
-    cd $ISL_LIB_PATH && ln -s libisl.so.13.1.0 libisl.so.10 && cd $BUILD_PATH;
+    cd $HOST_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.10 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.0 && cd $BUILD_PATH;
     ./build-success;
     sleep 5;
 
@@ -143,8 +173,7 @@ then
     cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard && git fetch smhub $SET_TARGET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
 
     # make libs available for ld
-    export LD_LIBRARY_PATH=$ISL_LIB_PATH:/usr/aarch64-linux-gnu/lib;
-
+    export LD_LIBRARY_PATH=$HOST_LIB_PATH:/usr/aarch64-linux-gnu/lib;
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
@@ -197,3 +226,7 @@ cd $SABERMOD_BUILD_ARCH;
 unset ENABLE_O3;
 unset ENABLE_PTHREAD;
 unset SET_TARGET_GCC;
+unset gcc_cv_use_emutls;
+unset libgomp_cv_have_attribute_visibility;
+unset LD_LIBRARY_PATH;
+unset C_INCLUDE_PATH;
