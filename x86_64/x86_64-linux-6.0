@@ -23,19 +23,21 @@
 ###########################################################################
 
 # Some predefined configurations
-export SET_GCC_VERSION=6.0.0;
+export SET_TARGET_GCC_VERSION=6.0.0;
 export SET_TARGET_GCC_MAJOR=6;
 export SET_TARGET_GCC_MINOR=0;
 export SET_ISL_VERSION=0.14.x;
 export SET_HOST_BUILD=x86_64-linux-gnu;
-export SET_TARGET=arm-linux-gnueabi;
-export SET_TARGET_GCC=arm-eabi-gcc;
+export SET_TARGET=x86_64-linux-gnu;
+export SET_TARGET_GCC=x86_64-gcc;
 export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod";
 export TARGET_ISL_LIB_VERSION=13.1.1;
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 export SABERMOD_BUILD_ARCH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 export ENABLE_O3="-O3";
 export ENABLE_PTHREAD="-pthread";
+export gcc_cv_use_emutls=yes;
+export libgomp_cv_have_attribute_visibility=yes;
 
 # Attempt to speed up compilation by linking everything to /tmp filesystem
 # Also find toolchain root
@@ -108,7 +110,7 @@ cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm master && g
 echo "";
 echo "";
 echo "";
-echo "Compiling isl ...";
+echo "Compiling ISL ...";
 echo "";
 echo "";
 echo "";
@@ -158,7 +160,7 @@ if [ -e $ISL_INSTALLED ] && [ -e $MPFR_INSTALLED ];
 then
 
     # Make a system link for older version of libisl using the newer version for older systems
-    cd $HOST_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.0 && cd $BUILD_PATH;
+    cd $HOST_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.10 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.0 && cd $BUILD_PATH;
     ./build-success;
     sleep 5;
 
@@ -167,24 +169,16 @@ then
     echo "";
     echo "";
 
-    # sysroot
-    cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard && git fetch sm gcc-5.0 && git checkout FETCH_HEAD && cd $BUILD_PATH;
-    export SYSROOT_SRC_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/sysroot/arch-arm;
-    export SYSROOT_DEST_PATH=$TOOLCHAIN_PREFIX_PATH/arch-arm;
-    cp -R $SYSROOT_SRC_PATH -f $SYSROOT_DEST_PATH;
-    export SYSROOT=--with-sysroot=$SYSROOT_DEST_PATH;
-
     # Make sure gcc is on the right remote branch 6.0.x
-    cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard && git fetch smhub $SET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
+    # Remove all and git reset --hard so there's no conflicts between branches
+    cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard && git fetch smhub $SET_TARGET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
 
     # make libs available for ld
-    export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
-    export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$HOST_LIB_PATH;
-    export C_INCLUDE_PATH=$HOST_INC_PATH;
+    export LD_LIBRARY_PATH=$HOST_LIB_PATH;
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
-    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=android --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-plugins --enable-ld=default --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --disable-bootstrap "--enable-eh-frame-hdr-for-static" --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --with-bugurl=mailto:sabermod.team@gmail.com --disable-libquadmath --disable-libatomic --enable-libgomp --enable-libsanitizer --enable-silent-rules;
+    ./configure $TOOLCHAIN_PREFIX --with-sysroot=/ --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&x86_64-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --enable-initfini-array "--enable-eh-frame-hdr-for-static" --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic --enable-silent-rules;
 
     echo "";
     echo "";
@@ -203,10 +197,11 @@ then
     # Did we make it?
     if [ -e $GCC_INSTALLED ];
     then
-        ./build-success;
+         ./build-success;
 
         # Cleanup
         rm -rf $SYSROOT_DEST_PATH;
+        rm -rf $TOOLCHAIN_PREFIX_PATH/aarch64-elf-linux;
         for la in `find $TOOLCHAIN_PREFIX_PATH -name *.la`;
         do
             rm $la;
@@ -232,5 +227,7 @@ cd $SABERMOD_BUILD_ARCH;
 unset ENABLE_O3;
 unset ENABLE_PTHREAD;
 unset SET_TARGET_GCC;
+unset gcc_cv_use_emutls;
+unset libgomp_cv_have_attribute_visibility;
 unset LD_LIBRARY_PATH;
 unset C_INCLUDE_PATH;

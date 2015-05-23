@@ -157,6 +157,8 @@ fi;
 
 cd $BUILD_PATH;
 
+git reset --hard;
+
 # Did we make it?
 if [ -e $CLOOG_INSTALLED ] && [ -e $MPFR_INSTALLED ];
 then

@@ -150,6 +150,8 @@ fi;
 
 cd $BUILD_PATH;
 
+git reset --hard;
+
 # Did we make it?
 if [ -e $ISL_INSTALLED ] && [ -e $MPFR_INSTALLED ];
 then
