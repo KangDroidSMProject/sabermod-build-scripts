@@ -235,3 +235,5 @@ unset ENABLE_O3;
 unset ENABLE_PTHREAD;
 unset LD_LIBRARY_PATH;
 unset C_INCLUDE_PATH;
+unset gcc_cv_use_emutls;
+unset libgomp_cv_have_attribute_visibility;
