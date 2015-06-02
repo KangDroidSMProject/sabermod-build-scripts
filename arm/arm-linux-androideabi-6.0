@@ -35,6 +35,8 @@ export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quo
 export SABERMOD_BUILD_ARCH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 export ENABLE_O3="-O3";
 export ENABLE_PTHREAD="-pthread";
+export gcc_cv_use_emutls=yes;
+export libgomp_cv_have_attribute_visibility=yes;
 
 # Attempt to speed up compilation by linking everything to /tmp filesystem
 # Also find toolchain root
