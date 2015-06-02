@@ -202,8 +202,11 @@ then
     export SET_TARGET_BUILD=GCC;
     export GCC_INSTALLED=$TOOLCHAIN_PREFIX_PATH/bin/$SET_TARGET_GCC;
 
+    FIND_LIB_GCC=`find $TOOLCHAIN_PREFIX_PATH -name libgcc.a`;
+    FIND_LIB_GCC=$FIND_LIB_GCC;
+
     # Did we make it?
-    if [ -e $GCC_INSTALLED ];
+    if [ -e $GCC_INSTALLED ] && [ -n "$FIND_LIB_GCC" ];
     then
         ./build-success;
 
