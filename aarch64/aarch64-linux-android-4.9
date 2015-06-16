@@ -32,6 +32,8 @@ export SET_HOST_BUILD=x86_64-linux-gnu;
 export SET_TARGET=aarch64-linux-android;
 export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-aosp-sabermod";
 export TARGET_ISL_LIB_VERSION=13.1.0;
+export TARGET_MPFR_LIB_VERSION=6.0.0;
+export TARGET_GMP_LIB_VERSION=10.2.0;
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 export SABERMOD_BUILD_ARCH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 export ENABLE_O3="-O3";
@@ -94,7 +96,8 @@ export HOST_LIB_PATH=$HOST_PREFIX_PATH/lib;
 export HOST_INC_PATH=$HOST_PREFIX_PATH/include;
 export HOST_PREFIX=--prefix=$HOST_PREFIX_PATH;
 export CLOOG_INSTALLED=$HOST_LIB_PATH/libcloog-isl.so.4;
-export MPFR_INSTALLED=$HOST_LIB_PATH/libmpfr.so.6;
+export MPFR_INSTALLED=$HOST_LIB_PATH/libmpfr.so.$TARGET_MPFR_LIB_VERSION;
+export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.so.$TARGET_GMP_LIB_VERSION;
 export SET_TARGET_BUILD=HOST;
 
 # Build and install cloog, isl and osl libraries into the toolchain.
@@ -155,12 +158,38 @@ then
     rm -rf autom4te.cache;
 fi;
 
-cd $BUILD_PATH;
+git reset --hard;
+
+# Build and install gmp libraries into the toolchain.
+
+# GMP Build Configuration
+cd $TOOLCHAIN_ROOT_SYMBOLIC/gmp/gmp-gnu && ./configure $HOST_PREFIX --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
+
+echo "";
+echo "";
+echo "";
+echo "Compiling GMP dependencies ...";
+echo "";
+echo "";
+echo "";
+
+make $MAKE_FLAGS -k >> $MAKE_LOG 2>&1;
+make install -k >> $MAKE_LOG 2>&1;
+
+# cleanup
+make $MAKE_FLAGS clean -k >> $MAKE_LOG 2>&1;
+make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
+if [ -d autom4te.cache ];
+then
+    rm -rf autom4te.cache;
+fi;
 
 git reset --hard;
 
+cd $BUILD_PATH;
+
 # Did we make it?
-if [ -e $CLOOG_INSTALLED ] && [ -e $MPFR_INSTALLED ];
+if [ -e $CLOOG_INSTALLED ] && [ -e $MPFR_INSTALLED ] && [ -e $GMP_INSTALLED ];
 then
 
     # Make a system link for older version of libisl using the newer version for older systems
