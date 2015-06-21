@@ -26,7 +26,7 @@
 export SET_TARGET_GCC_VERSION=6.0.0;
 export SET_TARGET_GCC_MAJOR=6;
 export SET_TARGET_GCC_MINOR=0;
-export SET_ISL_VERSION=0.14.x;
+export SET_ISL_VERSION=0.15;
 export SET_HOST_BUILD=x86_64-linux-gnu;
 export SET_TARGET=x86_64-linux-gnu;
 export SET_TARGET_GCC=x86_64-gcc;
