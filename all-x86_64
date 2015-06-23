@@ -1,6 +1,34 @@
 #!/bin/bash
 
+# SaberMod Build PATH
+export SABERMOD_BUILD="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+
 # Build all x86_64
 cd x86_64;
-bash x86_64-linux-4.9;
+bash x86_64-linux-5.1;
 
+# Do not allow all toolchains to compile if any fail.
+# Did we make it?
+if [ -e $GCC_INSTALLED ];
+then
+    CONTINUE=yes;
+else
+    CONTINUE=no;
+fi;
+
+if [ $CONTINUE = yes ];
+then
+    bash x86_64-linux-6.0;
+else
+    cd $BUILD_PATH && ./build-failed;
+fi;
+
+# Did we make it?
+if [ -e $GCC_INSTALLED ];
+then
+    CONTINUE=yes;
+else
+    CONTINUE=no;
+fi;
+
+cd $SABERMOD_BUILD;
