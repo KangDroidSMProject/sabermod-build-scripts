@@ -31,7 +31,7 @@ export SET_HOST_BUILD=x86_64-linux-gnu;
 export SET_TARGET=x86_64-linux-gnu;
 export SET_TARGET_GCC=x86_64-gcc;
 export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod";
-export TARGET_ISL_LIB_VERSION=13.1.1;
+export TARGET_ISL_LIB_VERSION=0.15.0;
 export TARGET_MPFR_LIB_VERSION=6.0.0;
 export TARGET_GMP_LIB_VERSION=10.2.0;
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
@@ -103,9 +103,11 @@ export SET_TARGET_BUILD=HOST;
 # Build and install isl into the toolchain.
 
 # ISL
+export ISL_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
+export ISL_PREFIX=--prefix=$ISL_PREFIX_PATH;
 
 # Make sure ISL is on the right master branch
-cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm master && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION;
 
 # ISL Build Configuration
 ./configure $HOST_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
@@ -113,7 +115,7 @@ cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm master && g
 echo "";
 echo "";
 echo "";
-echo "Compiling ISL ...";
+echo "Compiling isl ...";
 echo "";
 echo "";
 echo "";
@@ -126,7 +128,7 @@ make $MAKE_FLAGS clean -k >> $MAKE_LOG 2>&1;
 make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
 
 # untracked files
-rm -rf gitversion.h include/isl/stdint.h isl-uninstalled.pc isl-uninstalled.sh isl.pc isl.pc.in;
+rm -rf gitversion.h include/isl/stdint.h isl-uninstalled.pc isl-uninstalled.sh isl.pc isl/isl.pc.in;
 
 git reset --hard;
 
