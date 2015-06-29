@@ -72,10 +72,10 @@ if [ $ARCH != x86_64 ]; then
   echo 
   echo "Would you like to build a ROM toolchain or Kernel toolchain?"
 
-  while read -p "ROM or Kernel? " cchoice
+  while read -p "rom or kernel? " cchoice
   do
   case "$cchoice" in
-	ROM )
+	rom )
 
 		if [ $ARCH = "arm" ];
 		then
@@ -91,7 +91,7 @@ if [ $ARCH != x86_64 ]; then
 
 		if [ $ARCH = "arm" ];
 		then
-			export TARGET=-linux-gnueabi
+			export TARGET=-eabi
                 fi;
 		break
 		;;
