@@ -22,8 +22,25 @@
 ###########################################################################
 ###########################################################################
 
+# Ask for GCC Version to build
+echo "Which 4.9 base of gcc would you like to build?"
+
+while read -p "google or gnu? " cchoice
+do
+case "$cchoice" in
+	google )
+		export VER=4.9.x
+		break
+		;;
+	gnu )
+		export VER=4.9.4
+		break
+		;;
+esac
+done
+
 # Some predefined configurations
-export SET_GCC_VERSION=4.9.4;
+export SET_GCC_VERSION=$VER;
 export SET_TARGET_GCC_MAJOR=4;
 export SET_TARGET_GCC_MINOR=9;
 export SET_CLOOG_VERSION=0.18.3;

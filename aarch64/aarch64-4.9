@@ -22,11 +22,31 @@
 ###########################################################################
 ###########################################################################
 
+# Ask for GCC Version to build
+echo "Which 4.9 base of gcc would you like to build?"
+
+while read -p "google or gnu? " cchoice
+do
+case "$cchoice" in
+	google )
+		export VER=4.9.x
+		break
+		;;
+	gnu )
+		export VER=4.9.4
+		break
+		;;
+esac
+done
+
 # Some predefined configurations
-export SET_TARGET_GCC_VERSION=4.9.4;
+export SET_TARGET_GCC_VERSION=$VER;
 export SET_TARGET_GCC_MAJOR=4;
 export SET_TARGET_GCC_MINOR=9;
-export SET_SYSTEM_GCC_VERSION=5.1.1;
+if [ $VER = "4.9.4" ];
+then
+    export SET_SYSTEM_GCC_VERSION=5.1.1;
+fi;
 export SET_CLOOG_VERSION=0.18.3;
 export SET_ISL_VERSION=0.14.x;
 export TARGET_MPFR_LIB_VERSION=6.0.0;
@@ -236,16 +256,48 @@ then
     echo "";
     echo "";
 
+    if [ $VER = "4.9.x" ];
+    then
+
+        # sysroot
+        cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard && git fetch sm gcc-4.9 && git checkout FETCH_HEAD && cd $BUILD_PATH;
+        export SYSROOT_SRC_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/sysroot/arch-arm64;
+        export SYSROOT_DEST_PATH=$TOOLCHAIN_PREFIX_PATH/arch-arm64;
+        cp -R $SYSROOT_SRC_PATH -f $SYSROOT_DEST_PATH;
+        export SYSROOT=--with-sysroot=$SYSROOT_DEST_PATH;
+    fi;
+
     # Make sure gcc is on the right remote branch 4.9.x
     # Remove all and git reset --hard so there's no conflicts between branches
     cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard && git fetch smhub $SET_TARGET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
 
     # make libs available for ld
-    export LD_LIBRARY_PATH=$HOST_LIB_PATH:/usr/aarch64-linux-gnu/lib;
-    export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
+    if [ $VER = "4.9.x" ];
+    then
+        export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
+        export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$HOST_LIB_PATH;
+        export C_INCLUDE_PATH=$HOST_INC_PATH;
+        export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
+    elif [ $VER = "4.9.4" ];
+    then
+        export LD_LIBRARY_PATH=$HOST_LIB_PATH:/usr/aarch64-linux-gnu/lib;
+        export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
+    else
+        echo "Can not determine gcc version to build, exiting";
+        exit 1;
+    fi;
 
     # GCC Build Configuration
-    ./configure $TOOLCHAIN_PREFIX --with-sysroot=/ --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=/usr/aarch64-linux-gnu/include/c++/$SET_SYSTEM_GCC_VERSION --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic --enable-silent-rules;
+    if [ $VER = "4.9.x" ];
+    then
+        ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=android --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic --enable-silent-rules;
+    elif [ $VER = "4.9.4" ];
+    then
+        ./configure $TOOLCHAIN_PREFIX --with-sysroot=/ --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=/usr/aarch64-linux-gnu/include/c++/$SET_SYSTEM_GCC_VERSION --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic --enable-silent-rules;
+    else
+        echo "Can not determine gcc version to build, exiting";
+        exit 1;
+    fi;
 
     echo "";
     echo "";
@@ -270,7 +322,10 @@ then
         ./build-success;
 
         # Cleanup
-        rm -rf $SYSROOT_DEST_PATH;
+        if [ $VER = "4.9.x" ];
+        then
+            rm -rf $SYSROOT_DEST_PATH;
+        fi;
         rm -rf $TOOLCHAIN_PREFIX_PATH/aarch64-elf-linux;
         for la in `find $TOOLCHAIN_PREFIX_PATH -name *.la`;
         do

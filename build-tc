@@ -22,7 +22,7 @@ export FORM=$ARCH/$ARCH$TARGET-$VER
 # Ask for GCC Version to build
 echo "Which GCC version would you like to build?"
 
-while read -p "4.8, 4.9, 5.1 or 6.0?" cchoice
+while read -p "4.8, 4.9, 5.1 or 6.0? " cchoice
 do
 case "$cchoice" in
 	4.8 )
