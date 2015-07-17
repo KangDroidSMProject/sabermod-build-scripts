@@ -33,6 +33,21 @@ fi;
 
 if [ $CONTINUE = yes ];
 then
+    bash aarch64-5.2;
+else
+    cd $BUILD_PATH && ./build-failed;
+fi;
+
+# Did we make it?
+if [ -e $GCC_INSTALLED ];
+then
+    CONTINUE=yes;
+else
+    CONTINUE=no;
+fi;
+
+if [ $CONTINUE = yes ];
+then
     bash aarch64-6.0;
 else
     cd $BUILD_PATH && ./build-failed;
