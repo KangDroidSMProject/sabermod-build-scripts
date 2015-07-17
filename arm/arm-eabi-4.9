@@ -92,6 +92,12 @@ then
     make $MAKE_FLAGS distclean;
 fi;
 
+# Lets remove all the autom4te.cache that can be found
+for autom4te in `find $TOOLCHAIN_ROOT_SYMBOLIC -type d -name autom4te.cache`;
+do
+    rm -rf $autom4te;
+done;
+
 # untracked files
 if [ -d gmp-gnu ];
 then
