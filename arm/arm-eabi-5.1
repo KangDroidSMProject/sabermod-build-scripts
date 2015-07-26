@@ -110,7 +110,7 @@ export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.so.$TARGET_GMP_LIB_VERSION;
 export SET_TARGET_BUILD=ISL;
 
 # Build and install isl into the toolchain.
-cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION;
+cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm gcc-5 && git checkout FETCH_HEAD;
 
 # ISL Build Configuration
 ./configure $HOST_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
