@@ -44,12 +44,12 @@ export SET_GCC_VERSION=$VER;
 export SET_TARGET_GCC_MAJOR=4;
 export SET_TARGET_GCC_MINOR=9;
 export SET_CLOOG_VERSION=0.18.3;
-export SET_ISL_VERSION=0.14.x;
+export SET_ISL_VERSION=0.15;
 export SET_HOST_BUILD=x86_64-linux-gnu;
 export SET_TARGET=arm-linux-gnueabi;
 export SET_TARGET_GCC=arm-eabi-gcc
 export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod";
-export TARGET_ISL_LIB_VERSION=13.1.0;
+export TARGET_ISL_LIB_VERSION=15.0.0;
 export TARGET_MPFR_LIB_VERSION=6.0.0;
 export TARGET_GMP_LIB_VERSION=10.2.0;
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
@@ -128,8 +128,8 @@ export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.so.$TARGET_GMP_LIB_VERSION;
 # CLOOG
 export SET_TARGET_BUILD=CLOOG;
 
-# Make sure ISL is on the right 0.14 branch
-cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION;
+# Make sure ISL is on the right 0.15 branch
+cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm gcc-5 && git checkout FETCH_HEAD;
 
 # Cloog Build Configuration
 cd $TOOLCHAIN_ROOT_SYMBOLIC/cloog/cloog-$SET_CLOOG_VERSION && ./configure $HOST_PREFIX --with-isl=bundled --with-osl=bundled --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
@@ -250,7 +250,7 @@ if [ $CLOOG_INSTALLED = "yes" ] && [ $MPFR_INSTALLED = "yes" ] && [ $GMP_INSTALL
 then
 
     # Make a system link for older version of libisl using the newer version for older systems
-    cd $HOST_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.10 && cd $BUILD_PATH;
+    cd $HOST_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.10 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.0 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.1 && cd $BUILD_PATH;
     sleep 5;
 
     echo "Preparing sabermod toolchain sources ...";
