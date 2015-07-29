@@ -27,7 +27,7 @@ export SET_GCC_VERSION=6.0.0;
 export SET_TARGET_GCC_MAJOR=6;
 export SET_TARGET_GCC_MINOR=0;
 export SET_ISL_VERSION=0.15;
-export SET_HOST_BUILD=x86_64-linux-gnu;
+export SET_HOST_BUILD=x86_64-apple-darwin;
 export SET_TARGET=arm-linux-gnueabi;
 export SET_TARGET_GCC=arm-eabi-gcc;
 export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod";
@@ -59,7 +59,9 @@ cd $TOOLCHAIN_ROOT_SYMBOLIC/build;
 export BUILD_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
 # Try to parallelize the build for faster performance.
-export JOBS="$(cat /proc/cpuinfo | grep -c processor)";
+CORES=`sysctl -a | grep machdep.cpu | grep core_count | awk '{print $2}'`;
+THREADS=`sysctl -a | grep machdep.cpu | grep thread_count | awk '{print $2}'`;
+JOBS="$((($CORES * $THREADS) / 2))";
 
 # Determine Make flags
 export MAKE_FLAGS=-j"$JOBS";
@@ -101,16 +103,16 @@ export HOST_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
 export HOST_LIB_PATH=$HOST_PREFIX_PATH/lib;
 export HOST_INC_PATH=$HOST_PREFIX_PATH/include;
 export HOST_PREFIX=--prefix=$HOST_PREFIX_PATH;
-export ISL_INSTALLED=$HOST_LIB_PATH/libisl.so.$TARGET_ISL_LIB_VERSION;
-export MPFR_INSTALLED=$HOST_LIB_PATH/libmpfr.so.$TARGET_MPFR_LIB_VERSION;
-export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.so.$TARGET_GMP_LIB_VERSION;
+export ISL_INSTALLED=$HOST_LIB_PATH/libisl.13.dylib;
+export MPFR_INSTALLED=$HOST_LIB_PATH/libmpfr.6.dylib;
+export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.10.dylib;
 
 # ISL
 
 export SET_TARGET_BUILD=ISL;
 
 # Build and install isl into the toolchain.
-cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm master && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch github test && git checkout FETCH_HEAD;
 
 # ISL Build Configuration
 ./configure $HOST_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
@@ -227,8 +229,7 @@ if [ $ISL_INSTALLED = "yes" ] && [ $MPFR_INSTALLED = "yes" ] && [ $GMP_INSTALLED
 then
 
     # Make a system link for older version of libisl using the newer version for older systems
-    cd $HOST_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.10 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.0 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.1 && cd $BUILD_PATH;
-    sleep 5;
+    cd $HOST_LIB_PATH && ln -s libisl.13.dylib libisl.10.dylib && cd $BUILD_PATH;
 
     echo "Preparing sabermod toolchain sources ...";
     echo "";
@@ -239,7 +240,7 @@ then
     cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard && git fetch sm gcc-5.0 && git checkout FETCH_HEAD && cd $BUILD_PATH;
     export SYSROOT_SRC_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/sysroot/arch-arm;
     export SYSROOT_DEST_PATH=$TOOLCHAIN_PREFIX_PATH/arch-arm;
-    cp -R $SYSROOT_SRC_PATH -f $SYSROOT_DEST_PATH;
+    cp -vr $SYSROOT_SRC_PATH $SYSROOT_DEST_PATH;
     export SYSROOT=--with-sysroot=$SYSROOT_DEST_PATH;
 
     # Make sure gcc is on the right remote branch 6.0.x
@@ -252,7 +253,7 @@ then
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
-    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=android --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-plugins --enable-ld=default --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --disable-bootstrap "--enable-eh-frame-hdr-for-static" --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --with-bugurl=mailto:sabermod.team@gmail.com --disable-libquadmath --disable-libatomic --enable-libgomp --enable-libsanitizer --enable-silent-rules;
+    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-gdb-version=android --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-plugins --enable-ld=default --disable-option-checking --with-host-libstdcxx='-static-libgcc -lstdc++ -lm' --disable-bootstrap "--enable-eh-frame-hdr-for-static" --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --with-bugurl=mailto:sabermod.team@gmail.com --disable-libquadmath --disable-libatomic --enable-libgomp --enable-libsanitizer --enable-silent-rules;
 
     echo "";
     echo "";
