@@ -93,7 +93,7 @@ if [ -e /tmp/sm-tc ];
 then
     rm -rf /tmp/sm-tc;
 fi;
-cd ../../;
+cd ../../../;
 export TOOLCHAIN_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 cd /tmp && ln -s $TOOLCHAIN_ROOT /tmp/sm-tc && cd /tmp/sm-tc;
 
