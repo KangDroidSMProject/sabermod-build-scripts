@@ -45,7 +45,7 @@ export SET_TARGET_GCC_MAJOR=4;
 export SET_TARGET_GCC_MINOR=9;
 export SET_CLOOG_VERSION=0.18.4;
 export SET_ISL_VERSION=0.15;
-export SET_HOST_BUILD=x86_64-linux-gnu;
+export SET_HOST_BUILD=x86_64-apple-darwin;
 export SET_TARGET=aarch64-linux-android;
 export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-aosp-sabermod";
 export TARGET_ISL_LIB_VERSION=15.0.0;
@@ -76,7 +76,9 @@ cd $TOOLCHAIN_ROOT_SYMBOLIC/build;
 export BUILD_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
 # Try to parallelize the build for faster performance.
-export JOBS="$(cat /proc/cpuinfo | grep -c processor)";
+CORES=`sysctl -a | grep machdep.cpu | grep core_count | awk '{print $2}'`;
+THREADS=`sysctl -a | grep machdep.cpu | grep thread_count | awk '{print $2}'`;
+JOBS="$((($CORES * $THREADS) / 2))";
 
 # Determine Make flags
 export MAKE_FLAGS=-j"$JOBS"
@@ -118,9 +120,9 @@ export HOST_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
 export HOST_LIB_PATH=$HOST_PREFIX_PATH/lib;
 export HOST_INC_PATH=$HOST_PREFIX_PATH/include;
 export HOST_PREFIX=--prefix=$HOST_PREFIX_PATH;
-export CLOOG_INSTALLED=$HOST_LIB_PATH/libcloog-isl.so.4;
-export MPFR_INSTALLED=$HOST_LIB_PATH/libmpfr.so.$TARGET_MPFR_LIB_VERSION;
-export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.so.$TARGET_GMP_LIB_VERSION;
+export CLOOG_INSTALLED=$HOST_LIB_PATH/libcloog-isl.4.dylib;
+export MPFR_INSTALLED=$HOST_LIB_PATH/libmpfr.6.dylib;
+export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.10.dylib;
 
 # Build and install cloog, isl and osl libraries into the toolchain.
 
@@ -128,7 +130,7 @@ export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.so.$TARGET_GMP_LIB_VERSION;
 export SET_TARGET_BUILD=CLOOG;
 
 # Make sure ISL is on the right 0.15 branch
-cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm gcc-5 && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch github test && git checkout FETCH_HEAD;
 
 # Cloog Build Configuration
 cd $TOOLCHAIN_ROOT_SYMBOLIC/cloog/cloog-$SET_CLOOG_VERSION && ./configure $HOST_PREFIX --with-isl=bundled --with-osl=bundled --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
@@ -249,8 +251,7 @@ if [ $CLOOG_INSTALLED = "yes" ] && [ $MPFR_INSTALLED = "yes" ] && [ $GMP_INSTALL
 then
 
     # Make a system link for older version of libisl using the newer version for older systems
-    cd $HOST_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.10 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.0 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.1 && cd $BUILD_PATH;
-    sleep 5;
+    cd $HOST_LIB_PATH && ln -s libisl.13.dylib libisl.10.dylib && cd $BUILD_PATH;
 
     echo "Preparing sabermod toolchain sources ...";
     echo "";
@@ -261,7 +262,7 @@ then
     cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard && git fetch sm gcc-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR && git checkout FETCH_HEAD && cd $BUILD_PATH;
     export SYSROOT_SRC_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/sysroot/arch-arm64;
     export SYSROOT_DEST_PATH=$TOOLCHAIN_PREFIX_PATH/arch-arm64;
-    cp -R $SYSROOT_SRC_PATH -f $SYSROOT_DEST_PATH;
+    cp -vr $SYSROOT_SRC_PATH $SYSROOT_DEST_PATH;
     export SYSROOT=--with-sysroot=$SYSROOT_DEST_PATH;
 
     # Make sure gcc is on the right remote branch 4.9.x
@@ -275,7 +276,7 @@ then
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
-    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-linux-android-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=android --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --enable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --enable-silent-rules;
+    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-linux-android-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=android --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --enable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -lstdc++ -lm' --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --enable-silent-rules;
 
     echo "";
     echo "";
