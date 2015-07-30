@@ -23,23 +23,29 @@
 ###########################################################################
 
 # Ask for GCC Version to build
+echo "";
+echo "";
+echo "";
 echo "Which 4.9 base of gcc would you like to build?"
 
 while read -p "google or android? " cchoice
 do
 case "$cchoice" in
-	google )
-		export VER=4.9.x
-		break
-		;;
-	android )
-		export VER=aosp-4.9
-		break
-		;;
+        google )
+                export VER=4.9.x
+                break
+                ;;
+        gnu )
+                export VER=4.9.4
+                break
+                ;;
 esac
 done
 
 # Ask to optimize for cortex-a53 device
+echo "";
+echo "";
+echo "";
 echo "Would you like to optimize gcc for cortex-a53?"
 echo "Note: This is experimental and may not work properly to compile the android system and kernel."
 echo "Note: This is not required if you use cortex-a53 flags in the android system and kernel."
@@ -47,14 +53,16 @@ echo "Note: This is not required if you use cortex-a53 flags in the android syst
 while read -p "y/Y/yes/Yes or n/N/no/No? " cchoice
 do
 case "$cchoice" in
-	y | Y | yes | Yes)
-		export CORTEX_A53=yes;
-		break
-		;;
-	n | N | no | No)
-		export CORTEX_A53=no;
-		break
-		;;
+        y | Y | yes | Yes)
+                export CORTEX_A53=yes;
+                export CORTEX_FLAGS="--with-tune=cortex-a53";
+                break
+                ;;
+        n | N | no | No)
+                export CORTEX_A53=no;
+                export CORTEX_FLAGS="";
+                break
+                ;;
 esac
 done
 

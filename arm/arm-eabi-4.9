@@ -28,18 +28,21 @@ echo "Which 4.9 base of gcc would you like to build?"
 while read -p "google or gnu? " cchoice
 do
 case "$cchoice" in
-	google )
-		export VER=4.9.x
-		break
-		;;
-	gnu )
-		export VER=4.9.4
-		break
-		;;
+        google )
+                export VER=4.9.x
+                break
+                ;;
+        gnu )
+                export VER=4.9.4
+                break
+                ;;
 esac
 done
 
 # Ask to optimize for cortex-a15 device
+echo "";
+echo "";
+echo "";
 echo "Would you like to optimize gcc for cortex-a15?"
 echo "Note: this is not required if you use cortex-a15 flags in the android system and kernel."
 
@@ -47,11 +50,13 @@ while read -p "y/Y/yes/Yes or n/N/no/No? " cchoice
 do
 case "$cchoice" in
 	y | Y | yes | Yes)
-		export CORTEX_A15=yes;
+                export CORTEX_A15=yes;
+                export CORTEX_FLAGS="--with-tune=cortex-a15";
 		break
 		;;
 	n | N | no | No)
-		export CORTEX_A15=no;
+                export CORTEX_A15=no;
+                export CORTEX_FLAGS="";
 		break
 		;;
 esac
