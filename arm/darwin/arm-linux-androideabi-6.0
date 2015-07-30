@@ -102,7 +102,7 @@ export HOST_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
 export HOST_LIB_PATH=$HOST_PREFIX_PATH/lib;
 export HOST_INC_PATH=$HOST_PREFIX_PATH/include;
 export HOST_PREFIX=--prefix=$HOST_PREFIX_PATH;
-export ISL_INSTALLED=$HOST_LIB_PATH/libisl.13.dylib;
+export ISL_INSTALLED=$HOST_LIB_PATH/libisl.15.dylib;
 export MPFR_INSTALLED=$HOST_LIB_PATH/libmpfr.6.dylib;
 export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.10.dylib;
 
@@ -228,7 +228,7 @@ if [ $ISL_INSTALLED = "yes" ] && [ $MPFR_INSTALLED = "yes" ] && [ $GMP_INSTALLED
 then
 
     # Make a system link for older version of libisl using the newer version for older systems
-    cd $HOST_LIB_PATH && ln -s libisl.13.dylib libisl.10.dylib && cd $BUILD_PATH;
+    cd $HOST_LIB_PATH && ln -s libisl.15.dylib libisl.10.dylib && cd $BUILD_PATH;
 
     echo "Preparing sabermod toolchain sources ...";
     echo "";
