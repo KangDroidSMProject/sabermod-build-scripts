@@ -57,12 +57,13 @@ do
 case "$cchoice" in
         y | Y | yes | Yes)
 	        export NEON_VFPV4=yes;
+                 export NEON_VFPV4=yes;
                 export NEON_FLAGS="--with-fpu=neon-vfpv4";
                 break
                 ;;
         n | N | no | No)
                 export NEON_VFPV4=no;
-                export NEON_FLAGS="neon";
+                export NEON_FLAGS="--with-fpu=neon";
                 break
                 ;;
 esac
