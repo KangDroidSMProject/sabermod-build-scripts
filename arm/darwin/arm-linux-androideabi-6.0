@@ -294,7 +294,7 @@ then
 
     # make libs available for ld
     export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
-    export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$HOST_LIB_PATH;
+    export DYLD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$HOST_LIB_PATH;
     export C_INCLUDE_PATH=$HOST_INC_PATH;
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
@@ -352,7 +352,7 @@ cd $SABERMOD_BUILD_ARCH;
 # Clear variables
 unset ENABLE_O3;
 unset ENABLE_PTHREAD;
-unset LD_LIBRARY_PATH;
+unset DYLD_LIBRARY_PATH;
 unset C_INCLUDE_PATH;
 unset gcc_cv_use_emutls;
 unset libgomp_cv_have_attribute_visibility;

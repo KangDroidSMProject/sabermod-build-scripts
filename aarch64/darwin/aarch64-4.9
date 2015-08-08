@@ -307,12 +307,12 @@ then
     if [ $VER = "4.9.x" ];
     then
         export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
-        export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$HOST_LIB_PATH;
+        export DYLD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$HOST_LIB_PATH;
         export C_INCLUDE_PATH=$HOST_INC_PATH;
         export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
     elif [ $VER = "4.9.4" ];
     then
-        export LD_LIBRARY_PATH=$HOST_LIB_PATH:/usr/aarch64-linux-gnu/lib;
+        export DYLD_LIBRARY_PATH=$HOST_LIB_PATH:/usr/aarch64-linux-gnu/lib;
         export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
     else
         echo "Can not determine gcc version to build, exiting";
@@ -386,7 +386,7 @@ unset ENABLE_PTHREAD;
 unset SET_TARGET_GCC;
 unset gcc_cv_use_emutls;
 unset libgomp_cv_have_attribute_visibility;
-unset LD_LIBRARY_PATH;
+unset DYLD_LIBRARY_PATH;
 unset C_INCLUDE_PATH;
 unset VER;
 unset CORTEX_FLAGS;
