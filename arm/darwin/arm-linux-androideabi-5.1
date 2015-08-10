@@ -1,0 +1,359 @@
+#!/bin/bash
+
+# Copyright (C) 2013-2015 The SaberMod Project
+
+#Licensed under the Apache License, Version 2.0 (the "License");
+#   you may not use this file except in compliance with the License.
+#   You may obtain a copy of the License at
+
+#       http://www.apache.org/licenses/LICENSE-2.0
+
+#   Unless required by applicable law or agreed to in writing, software
+#   distributed under the License is distributed on an "AS IS" BASIS,
+#   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#   See the License for the specific language governing permissions and
+#   limitations under the License.
+
+###########################################################################
+###########################################################################
+#####
+#####  C O N F I G U R A T I O N
+#####
+###########################################################################
+###########################################################################
+
+# Ask to optimize for cortex-a15 device
+echo "";
+echo "";
+echo "";
+echo "Would you like to optimize gcc for cortex-a15?"
+echo "Note: this is not required if you use cortex-a15 flags in the android system and kernel."
+
+while read -p "y/Y/yes/Yes or n/N/no/No? " cchoice
+do
+case "$cchoice" in
+        y | Y | yes | Yes)
+	        export CORTEX_A15=yes;
+                export CORTEX_FLAGS="--with-tune=cortex-a15";
+                break
+                ;;
+        n | N | no | No)
+                export CORTEX_A15=no;
+                export CORTEX_FLAGS="";
+                break
+                ;;
+esac
+done
+
+# Ask to optimize for neon-vfpv4 device
+echo "";
+echo "";
+echo "";
+echo "Would you like to optimize gcc for neon-vfpv4?"
+echo "Note: mostly used on krait and newer devices.  Do not use on very old devices"
+
+while read -p "y/Y/yes/Yes or n/N/no/No? " cchoice
+do
+case "$cchoice" in
+        y | Y | yes | Yes)
+                export NEON_VFPV4=yes;
+                export NEON_FLAGS="--with-fpu=neon-vfpv4";
+                break
+                ;;
+        n | N | no | No)
+                export NEON_VFPV4=no;
+                export NEON_FLAGS="--with-fpu=neon";
+                break
+                ;;
+esac
+done
+
+# Some predefined configurations
+export SET_GCC_VERSION=5.1.1;
+export SET_TARGET_GCC_MAJOR=5;
+export SET_TARGET_GCC_MINOR=1;
+export SET_ISL_VERSION=0.15;
+export SET_HOST_BUILD=x86_64-linux-gnu;
+export SET_TARGET=arm-linux-androideabi;
+export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod";
+export TARGET_ISL_LIB_VERSION=15.0.0;
+export TARGET_MPFR_LIB_VERSION=6.0.0;
+export TARGET_GMP_LIB_VERSION=10.2.0;
+export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
+export SABERMOD_BUILD_ARCH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+export ENABLE_O3="-O3";
+export ENABLE_PTHREAD="-pthread";
+export gcc_cv_use_emutls=yes;
+export libgomp_cv_have_attribute_visibility=yes;
+
+# Attempt to speed up compilation by linking everything to /tmp filesystem
+# Also find toolchain root
+if [ -e /tmp/sm-tc ];
+then
+    rm -rf /tmp/sm-tc;
+fi;
+cd ../../;
+export TOOLCHAIN_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+cd /tmp && ln -s $TOOLCHAIN_ROOT /tmp/sm-tc && cd /tmp/sm-tc;
+
+export TOOLCHAIN_ROOT_SYMBOLIC="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+
+cd $TOOLCHAIN_ROOT_SYMBOLIC/build;
+
+# Build PATH
+export BUILD_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+
+# Try to parallelize the build for faster performance.
+export JOBS="$(cat /proc/cpuinfo | grep -c processor)";
+
+# Determine Make flags
+export MAKE_FLAGS=-j"$JOBS";
+
+# Set log location
+export MAKE_LOG=$BUILD_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR.log;
+
+# Make a clean build
+if [ -e Makefile ];
+then
+    make $MAKE_FLAGS clean;
+    make $MAKE_FLAGS distclean;
+fi;
+
+# Lets remove all the autom4te.cache that can be found
+for autom4te in `find $TOOLCHAIN_ROOT_SYMBOLIC -type d -name autom4te.cache`;
+do
+    rm -rf $autom4te;
+done;
+
+# untracked files
+if [ -d gmp-gnu ];
+then
+    rm -rf gmp-gnu;
+fi;
+
+export TOOLCHAIN_PREFIX_PATH=~/tmp/arm-linux-androideabi-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR;
+
+if [ -d "$TOOLCHAIN_PREFIX_PATH" ];
+then
+    rm -rf $TOOLCHAIN_PREFIX_PATH;
+    mkdir -p $TOOLCHAIN_PREFIX_PATH;
+else
+    mkdir -p $TOOLCHAIN_PREFIX_PATH;
+fi;
+
+# Path for host libs and includes
+export HOST_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
+export HOST_LIB_PATH=$HOST_PREFIX_PATH/lib;
+export HOST_INC_PATH=$HOST_PREFIX_PATH/include;
+export HOST_PREFIX=--prefix=$HOST_PREFIX_PATH;
+export ISL_INSTALLED=$HOST_LIB_PATH/libisl.so.$TARGET_ISL_LIB_VERSION;
+export MPFR_INSTALLED=$HOST_LIB_PATH/libmpfr.so.$TARGET_MPFR_LIB_VERSION;
+export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.so.$TARGET_GMP_LIB_VERSION;
+
+# ISL
+
+export SET_TARGET_BUILD=ISL;
+
+# Build and install isl into the toolchain.
+cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm gcc-5 && git checkout FETCH_HEAD;;
+
+# ISL Build Configuration
+./configure $HOST_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
+
+echo "";
+echo "";
+echo "";
+echo "Compiling ISL dependencies ...";
+echo "";
+echo "";
+echo "";
+
+make $MAKE_FLAGS -k > $MAKE_LOG 2>&1;
+make install -k >> $MAKE_LOG 2>&1;
+
+# Is ISL Installed?
+if [ -e $ISL_INSTALLED ];
+then
+    export ISL_INSTALLED=yes;
+    bash $BUILD_PATH/build-success;
+else
+    export ISL_INSTALLED=no;
+fi;
+
+# cleanup
+make $MAKE_FLAGS clean -k >> $MAKE_LOG 2>&1;
+make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
+
+# untracked files
+rm -rf gitversion.h include/isl/stdint.h isl-uninstalled.pc isl-uninstalled.sh isl.pc isl/isl.pc.in;
+
+git reset --hard;
+
+# MPFR
+export SET_TARGET_BUILD=MPFR;
+
+# Build and install mpfr libraries into the toolchain.
+
+# MPFR Build Configuration
+cd $TOOLCHAIN_ROOT_SYMBOLIC/mpfr/mpfr-gnu && ./configure $HOST_PREFIX --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
+
+echo "";
+echo "";
+echo "";
+echo "Compiling MPFR dependencies ...";
+echo "";
+echo "";
+echo "";
+
+make $MAKE_FLAGS -k >> $MAKE_LOG 2>&1;
+make install -k >> $MAKE_LOG 2>&1;
+
+# Is MPFR Installed?
+if [ -e $MPFR_INSTALLED ];
+then
+    export MPFR_INSTALLED=yes;
+    bash $BUILD_PATH/build-success;
+else
+    export MPFR_INSTALLED=no;
+fi;
+
+# cleanup
+make $MAKE_FLAGS clean -k >> $MAKE_LOG 2>&1;
+make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
+if [ -d autom4te.cache ];
+then
+    rm -rf autom4te.cache;
+fi;
+
+git reset --hard;
+
+# GMP
+export SET_TARGET_BUILD=GMP;
+
+# Build and install gmp libraries into the toolchain.
+
+# GMP Build Configuration
+cd $TOOLCHAIN_ROOT_SYMBOLIC/gmp/gmp-gnu && ./configure $HOST_PREFIX;
+
+echo "";
+echo "";
+echo "";
+echo "Compiling GMP dependencies ...";
+echo "";
+echo "";
+echo "";
+
+make $MAKE_FLAGS -k >> $MAKE_LOG 2>&1;
+make install -k >> $MAKE_LOG 2>&1;
+
+# Is GMP Installed?
+if [ -e $GMP_INSTALLED ];
+then
+    export GMP_INSTALLED=yes;
+    bash $BUILD_PATH/build-success;
+else
+    export GMP_INSTALLED=no;
+fi;
+
+# cleanup
+make $MAKE_FLAGS clean -k >> $MAKE_LOG 2>&1;
+make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
+if [ -d autom4te.cache ];
+then
+    rm -rf autom4te.cache;
+fi;
+
+git reset --hard;
+
+cd $BUILD_PATH;
+
+# Did all of the host libraries get installed
+if [ $ISL_INSTALLED = "yes" ] && [ $MPFR_INSTALLED = "yes" ] && [ $GMP_INSTALLED = "yes" ];
+then
+
+    # Make a system link for older version of libisl using the newer version for older systems
+    cd $HOST_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.10 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.0 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.1 && cd $BUILD_PATH;
+    sleep 5;
+
+    echo "Preparing sabermod toolchain sources ...";
+    echo "";
+    echo "";
+    echo "";
+
+    # sysroot
+    cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard && git fetch sm gcc-5.0 && git checkout FETCH_HEAD && cd $BUILD_PATH;
+    export SYSROOT_SRC_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/sysroot/arch-arm;
+    export SYSROOT_DEST_PATH=$TOOLCHAIN_PREFIX_PATH/arch-arm;
+    cp -R $SYSROOT_SRC_PATH -f $SYSROOT_DEST_PATH;
+    export SYSROOT=--with-sysroot=$SYSROOT_DEST_PATH;
+
+    # Make sure gcc is on the right remote branch 5.1.x
+    cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard && git fetch smhub $SET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
+
+    # make libs available for ld
+    export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
+    export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$HOST_LIB_PATH;
+    export C_INCLUDE_PATH=$HOST_INC_PATH;
+    export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
+
+    # GCC Build Configuration
+    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-linux-androideabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=android --with-mpc-version=gnu --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --with-gold-version=android --enable-gold=default --enable-plugins --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' "--enable-eh-frame-hdr-for-static" --enable-initfini-array --disable-bootstrap --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --enable-libsanitizer --with-bugurl=mailto:sabermod.team@gmail.com --enable-silent-rules;
+
+    echo "";
+    echo "";
+    echo "";
+    echo "Compiling sabermod toolchain $SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR ...";
+
+    # Build the toolchain
+    make $MAKE_FLAGS -k >> $MAKE_LOG 2>&1;
+
+    # Install the toolchain (twice)
+    make install -k >> $MAKE_LOG 2>&1 && make install -k >> $MAKE_LOG 2>&1;
+
+    export SET_TARGET_BUILD=GCC;
+    export GCC_INSTALLED=$TOOLCHAIN_PREFIX_PATH/bin/$SET_TARGET-gcc;
+
+    FIND_LIB_GCC=`find $TOOLCHAIN_PREFIX_PATH -name libgcc.a`;
+    FIND_LIB_GCC=$FIND_LIB_GCC;
+
+    # Did we make it?
+    if [ -e $GCC_INSTALLED ] && [ -n "$FIND_LIB_GCC" ];
+    then
+        ./build-success;
+
+        # Install android specific files
+        ./and-makefiles-arm;
+
+        # Cleanup
+        rm -rf $SYSROOT_DEST_PATH;
+        for la in `find $TOOLCHAIN_PREFIX_PATH -name *.la`;
+        do
+            rm $la;
+        done;
+        for pc in `find $TOOLCHAIN_PREFIX_PATH -name *.pc`;
+        do
+            rm $pc;
+        done;
+        for cmake in `find $TOOLCHAIN_PREFIX_PATH -name *.cmake`;
+        do
+            rm $cmake;
+        done;
+    else
+        ./build-failed;
+    fi;
+else
+    ./build-failed;
+fi;
+
+cd $SABERMOD_BUILD_ARCH;
+
+# Clear variables
+unset ENABLE_O3;
+unset ENABLE_PTHREAD;
+unset gcc_cv_use_emutls;
+unset libgomp_cv_have_attribute_visibility;
+unset LD_LIBRARY_PATH;
+unset C_INCLUDE_PATH;
+unset VER;
+unset CORTEX_A15;
+unset NEON_VFPV4;
