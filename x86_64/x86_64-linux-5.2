@@ -25,7 +25,7 @@
 # Some predefined configurations
 export SET_TARGET_GCC_VERSION=5.2.0;
 export SET_TARGET_GCC_MAJOR=5;
-export SET_TARGET_GCC_MINOR=1;
+export SET_TARGET_GCC_MINOR=2;
 export SET_ISL_VERSION=0.15;
 export SET_HOST_BUILD=x86_64-linux-gnu;
 export SET_TARGET=x86_64-linux-gnu;
@@ -264,7 +264,7 @@ then
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
-    ./configure $TOOLCHAIN_PREFIX --with-sysroot=/ --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&x86_64-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --enable-initfini-array "--enable-eh-frame-hdr-for-static" --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --enable-silent-rules;
+    ./configure $TOOLCHAIN_PREFIX --with-sysroot=/ --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&x86_64-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --enable-initfini-array "--enable-eh-frame-hdr-for-static" --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --enable-silent-rules;
 
     echo "";
     echo "";
