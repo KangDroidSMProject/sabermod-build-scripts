@@ -121,11 +121,31 @@ cd $TOOLCHAIN_ROOT_SYMBOLIC/build;
 # Build PATH
 export BUILD_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
-# Try to parallelize the build for faster performance.
+# Try to overclock a little by adding two extra threads to shorten build time.
+# Only supported up to 16 cores, after which it's automatic.
 export JOBS="$(cat /proc/cpuinfo | grep -c processor)";
 
-# Determine Make flags
-export MAKE_FLAGS=-j"$JOBS";
+if [ $JOBS = "4" ];
+then
+    export MAKE_FLAGS="-j6";
+elif [ $JOBS = "6" ];
+then
+    export MAKE_FLAGS="-j8";
+elif [ $JOBS = "8" ];
+then
+    export MAKE_FLAGS="-j10";
+elif [ $JOBS = "10" ];
+then
+    export MAKE_FLAGS="-j12";
+elif [ $JOBS = "12" ];
+then
+    export MAKE_FLAGS="-j14";
+elif [ $JOBS = "14" ];
+then
+    export MAKE_FLAGS="-j16";
+else
+    export MAKE_FLAGS=-j"$JOBS";
+fi;
 
 # Set log location
 export MAKE_LOG=$BUILD_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR.log;
