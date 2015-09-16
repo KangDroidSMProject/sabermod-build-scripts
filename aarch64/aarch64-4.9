@@ -328,10 +328,13 @@ then
         export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
         export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$HOST_LIB_PATH;
         export C_INCLUDE_PATH=$HOST_INC_PATH;
+        export CPLUS_INCLUDE_PATH=$HOST_INC_PATH;
         export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
     elif [ $VER = "4.9.4" ];
     then
         export LD_LIBRARY_PATH=$HOST_LIB_PATH:/usr/aarch64-linux-gnu/lib;
+        export C_INCLUDE_PATH=$HOST_INC_PATH;
+        export CPLUS_INCLUDE_PATH=$HOST_INC_PATH;
         export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
     else
         echo "Can not determine gcc version to build, exiting";
@@ -409,3 +412,4 @@ unset LD_LIBRARY_PATH;
 unset C_INCLUDE_PATH;
 unset VER;
 unset CORTEX_FLAGS;
+unset CPLUS_INCLUDE_PATH;

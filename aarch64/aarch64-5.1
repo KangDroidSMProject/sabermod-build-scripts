@@ -284,6 +284,8 @@ then
 
     # make libs available for ld
     export LD_LIBRARY_PATH=$HOST_LIB_PATH:/usr/aarch64-linux-gnu/lib;
+    export C_INCLUDE_PATH=$HOST_INC_PATH;
+    export CPLUS_INCLUDE_PATH=$HOST_INC_PATH;
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
@@ -345,3 +347,4 @@ unset LD_LIBRARY_PATH;
 unset C_INCLUDE_PATH;
 unset VER;
 unset CORTEX_FLAGS;
+unset CPLUS_INCLUDE_PATH;

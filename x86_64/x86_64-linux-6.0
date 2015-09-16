@@ -261,6 +261,8 @@ then
 
     # make libs available for ld
     export LD_LIBRARY_PATH=$HOST_LIB_PATH;
+    export C_INCLUDE_PATH=$HOST_INC_PATH;
+    export CPLUS_INCLUDE_PATH=$HOST_INC_PATH;
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
