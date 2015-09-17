@@ -31,7 +31,7 @@ export SET_HOST_BUILD=x86_64-linux-gnu;
 export SET_TARGET=x86_64-linux-gnu;
 export SET_TARGET_GCC=x86_64-gcc;
 export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod";
-export TARGET_ISL_LIB_VERSION=0.15.0;
+export TARGET_ISL_LIB_VERSION=15.0.0;
 export TARGET_MPFR_LIB_VERSION=6.0.0;
 export TARGET_GMP_LIB_VERSION=10.2.0;
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
