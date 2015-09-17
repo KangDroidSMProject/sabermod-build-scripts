@@ -322,3 +322,4 @@ unset gcc_cv_use_emutls;
 unset libgomp_cv_have_attribute_visibility;
 unset LD_LIBRARY_PATH;
 unset C_INCLUDE_PATH;
+unset CPLUS_INCLUDE_PATH;
