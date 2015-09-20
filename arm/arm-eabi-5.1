@@ -362,6 +362,7 @@ then
         cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.x/lib/libgomp.a $HOST_LIB_PATH/libgomp.a;
         cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.x/lib/libgomp-plugin-host_nonshm.a $HOST_LIB_PATH/libgomp-plugin-host_nonshm.a;
         cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.x/lib/libgomp.spec $HOST_LIB_PATH/libgomp.spec;
+        cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.x/include/omp.h $HOST_INC_PATH/omp.h;
     else
         ./build-failed;
     fi;

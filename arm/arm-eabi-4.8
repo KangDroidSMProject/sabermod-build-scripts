@@ -367,6 +367,7 @@ then
         # Install libgomp prebuilt libs
         cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR/lib/libgomp.a $HOST_LIB_PATH/libgomp.a;
         cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR/lib/libgomp.spec $HOST_LIB_PATH/libgomp.spec;
+        cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR/include/omp.h $HOST_INC_PATH/omp.h;
     else
         ./build-failed;
     fi;
