@@ -325,7 +325,7 @@ then
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
-    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-plugins --enable-ld=default --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --disable-bootstrap "--enable-eh-frame-hdr-for-static" --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --with-bugurl=mailto:sabermod.team@gmail.com --disable-libquadmath --disable-libatomic --enable-libgomp --enable-libsanitizer --disable-libmudflap --enable-silent-rules;
+    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-plugins --enable-ld=default --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --disable-bootstrap "--enable-eh-frame-hdr-for-static" --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --with-bugurl=mailto:sabermod.team@gmail.com --disable-libquadmath --disable-libatomic --disable-libgomp --enable-silent-rules --enable-shared;
 
     echo "";
     echo "";
