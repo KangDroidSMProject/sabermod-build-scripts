@@ -382,6 +382,10 @@ then
         do
             rm $cmake;
         done;
+
+        # Install prebuilt ld.mcld and create a symbolic link for exec
+        cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR/bin/$SET_TARGET-ld.mcld $TOOLCHAIN_PREFIX_PATH/bin/$SET_TARGET-ld.mcld;
+        cd $TOOLCHAIN_PREFIX_PATH/$SET_TARGET/bin && ln ../../bin/$SET_TARGET-ld.mcld -s ld.mcld;
     else
         ./build-failed;
     fi;
