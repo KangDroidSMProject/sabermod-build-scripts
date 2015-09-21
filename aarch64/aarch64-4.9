@@ -137,8 +137,12 @@ export MAKE_LOG=$BUILD_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MI
 # Make a clean build
 if [ -e Makefile ];
 then
-    make $MAKE_FLAGS clean;
-    make $MAKE_FLAGS distclean;
+    echo "";
+    echo "";
+    echo "";
+    echo "Cleaning ...";
+    make $MAKE_FLAGS clean -k > $MAKE_LOG 2>&1;
+    make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
 fi;
 
 # Lets remove all the autom4te.cache that can be found
@@ -178,10 +182,10 @@ export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.so.$TARGET_GMP_LIB_VERSION;
 export SET_TARGET_BUILD=CLOOG;
 
 # Make sure ISL is on the right 0.15 branch
-cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm gcc-5 && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm gcc-5 > $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1;
 
 # Cloog Build Configuration
-cd $TOOLCHAIN_ROOT_SYMBOLIC/cloog/cloog-$SET_CLOOG_VERSION && ./configure $HOST_PREFIX --with-isl=bundled --with-osl=bundled --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
+cd $TOOLCHAIN_ROOT_SYMBOLIC/cloog/cloog-$SET_CLOOG_VERSION && ./configure $HOST_PREFIX --with-isl=bundled --with-osl=bundled --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET >> $MAKE_LOG 2>&1;
 
 echo "";
 echo "";
@@ -191,7 +195,7 @@ echo "";
 echo "";
 echo "";
 
-make $MAKE_FLAGS -k > $MAKE_LOG 2>&1;
+make $MAKE_FLAGS -k >> $MAKE_LOG 2>&1;
 make install -k >> $MAKE_LOG 2>&1;
 
 # Is CLOOG Installed?
@@ -214,7 +218,7 @@ fi;
 # untracked files
 rm -rf cloog-isl-uninstalled.pc cloog-isl-uninstalled.sh cloog-isl.pc cloog-isl.pc.in doc/gitversion.texi version.h isl/gitversion.h isl/include/isl/stdint.h isl/isl-uninstalled.pc isl/isl-uninstalled.sh isl/isl.pc isl/isl.pc.in;
 
-git reset --hard;
+git reset --hard >> $MAKE_LOG 2>&1;
 
 # MPFR
 export SET_TARGET_BUILD=MPFR;
@@ -222,7 +226,7 @@ export SET_TARGET_BUILD=MPFR;
 # Build and install mpfr libraries into the toolchain.
 
 # MPFR Build Configuration
-cd $TOOLCHAIN_ROOT_SYMBOLIC/mpfr/mpfr-gnu && ./configure $HOST_PREFIX --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
+cd $TOOLCHAIN_ROOT_SYMBOLIC/mpfr/mpfr-gnu && ./configure $HOST_PREFIX --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET >> $MAKE_LOG 2>&1;
 
 echo "";
 echo "";
@@ -252,7 +256,7 @@ then
     rm -rf autom4te.cache;
 fi;
 
-git reset --hard;
+git reset --hard >> $MAKE_LOG 2>&1;
 
 # GMP
 export SET_TARGET_BUILD=GMP;
@@ -260,7 +264,7 @@ export SET_TARGET_BUILD=GMP;
 # Build and install gmp libraries into the toolchain.
 
 # GMP Build Configuration
-cd $TOOLCHAIN_ROOT_SYMBOLIC/gmp/gmp-gnu && ./configure $HOST_PREFIX;
+cd $TOOLCHAIN_ROOT_SYMBOLIC/gmp/gmp-gnu && ./configure $HOST_PREFIX >> $MAKE_LOG 2>&1;
 
 echo "";
 echo "";
@@ -290,7 +294,7 @@ then
     rm -rf autom4te.cache;
 fi;
 
-git reset --hard;
+git reset --hard >> $MAKE_LOG 2>&1;
 
 cd $BUILD_PATH;
 
@@ -311,7 +315,7 @@ then
     then
 
         # sysroot
-        cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard && git fetch sm gcc-4.9 && git checkout FETCH_HEAD && cd $BUILD_PATH;
+        cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard >> $MAKE_LOG 2>&1 && git fetch sm gcc-4.9 >> $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1 && cd $BUILD_PATH;
         export SYSROOT_SRC_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/sysroot/arch-arm64;
         export SYSROOT_DEST_PATH=$TOOLCHAIN_PREFIX_PATH/arch-arm64;
         cp -R $SYSROOT_SRC_PATH -f $SYSROOT_DEST_PATH;
@@ -320,7 +324,7 @@ then
 
     # Make sure gcc is on the right remote branch 4.9.x
     # Remove all and git reset --hard so there's no conflicts between branches
-    cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard && git fetch smhub $SET_TARGET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
+    cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard >> $MAKE_LOG 2>&1 && git fetch smhub $SET_TARGET_GCC_VERSION >> $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1 && cd $BUILD_PATH;
 
     # make libs available for ld
     if [ $VER = "4.9.x" ];
@@ -344,10 +348,10 @@ then
     # GCC Build Configuration
     if [ $VER = "4.9.x" ];
     then
-        ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic --enable-silent-rules;
+        ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic --enable-silent-rules >> $MAKE_LOG 2>&1;
     elif [ $VER = "4.9.4" ];
     then
-        ./configure $TOOLCHAIN_PREFIX --with-sysroot=/ --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=/usr/aarch64-linux-gnu/include/c++/$SET_SYSTEM_GCC_VERSION --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic --enable-silent-rules;
+        ./configure $TOOLCHAIN_PREFIX --with-sysroot=/ --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-gdb-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=/usr/aarch64-linux-gnu/include/c++/$SET_SYSTEM_GCC_VERSION --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic --enable-silent-rules >> $MAKE_LOG 2>&1;
     else
         echo "Can not determine gcc version to build, exiting";
         exit 1;

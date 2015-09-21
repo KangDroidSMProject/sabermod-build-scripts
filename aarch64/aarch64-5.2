@@ -113,8 +113,12 @@ export MAKE_LOG=$BUILD_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MI
 # Make a clean build
 if [ -e Makefile ];
 then
-    make $MAKE_FLAGS clean;
-    make $MAKE_FLAGS distclean;
+    echo "";
+    echo "";
+    echo "";
+    echo "Cleaning ...";
+    make $MAKE_FLAGS clean -k > $MAKE_LOG 2>&1;
+    make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
 fi;
 
 # Lets remove all the autom4te.cache that can be found
@@ -153,10 +157,10 @@ export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.so.$TARGET_GMP_LIB_VERSION;
 export SET_TARGET_BUILD=ISL;
 
 # Build and install isl into the toolchain.
-cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm gcc-5 && git checkout FETCH_HEAD;
+cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm gcc-5 > $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1;
 
 # ISL Build Configuration
-./configure $HOST_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
+./configure $HOST_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET >> $MAKE_LOG 2>&1;
 
 echo "";
 echo "";
@@ -166,7 +170,7 @@ echo "";
 echo "";
 echo "";
 
-make $MAKE_FLAGS -k > $MAKE_LOG 2>&1;
+make $MAKE_FLAGS -k >> $MAKE_LOG 2>&1;
 make install -k >> $MAKE_LOG 2>&1;
 
 # Is ISL Installed?
@@ -185,7 +189,7 @@ make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
 # untracked files
 rm -rf gitversion.h include/isl/stdint.h isl-uninstalled.pc isl-uninstalled.sh isl.pc isl/isl.pc.in;
 
-git reset --hard;
+git reset --hard >> $MAKE_LOG 2>&1;
 
 # MPFR
 export SET_TARGET_BUILD=MPFR;
@@ -193,7 +197,7 @@ export SET_TARGET_BUILD=MPFR;
 # Build and install mpfr libraries into the toolchain.
 
 # MPFR Build Configuration
-cd $TOOLCHAIN_ROOT_SYMBOLIC/mpfr/mpfr-gnu && ./configure $HOST_PREFIX --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET;
+cd $TOOLCHAIN_ROOT_SYMBOLIC/mpfr/mpfr-gnu && ./configure $HOST_PREFIX --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET >> $MAKE_LOG 2>&1;
 
 echo "";
 echo "";
@@ -223,7 +227,7 @@ then
     rm -rf autom4te.cache;
 fi;
 
-git reset --hard;
+git reset --hard >> $MAKE_LOG 2>&1;
 
 # GMP
 export SET_TARGET_BUILD=GMP;
@@ -231,7 +235,7 @@ export SET_TARGET_BUILD=GMP;
 # Build and install gmp libraries into the toolchain.
 
 # GMP Build Configuration
-cd $TOOLCHAIN_ROOT_SYMBOLIC/gmp/gmp-gnu && ./configure $HOST_PREFIX;
+cd $TOOLCHAIN_ROOT_SYMBOLIC/gmp/gmp-gnu && ./configure $HOST_PREFIX >> $MAKE_LOG 2>&1;
 
 echo "";
 echo "";
@@ -261,7 +265,7 @@ then
     rm -rf autom4te.cache;
 fi;
 
-git reset --hard;
+git reset --hard >> $MAKE_LOG 2>&1;
 
 cd $BUILD_PATH;
 
@@ -280,7 +284,7 @@ then
 
     # Make sure gcc is on the right remote branch 5.2.x
     # Remove all and git reset --hard so there's no conflicts between branches
-    cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard && git fetch smhub $SET_TARGET_GCC_VERSION && git checkout FETCH_HEAD && cd $BUILD_PATH;
+    cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard >> $MAKE_LOG 2>&1 && git fetch smhub $SET_TARGET_GCC_VERSION >> $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1 && cd $BUILD_PATH;
 
     # make libs available for ld
     export LD_LIBRARY_PATH=$HOST_LIB_PATH:/usr/aarch64-linux-gnu/lib;
@@ -289,7 +293,7 @@ then
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
-    ./configure $TOOLCHAIN_PREFIX --with-sysroot=/ --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=/usr/aarch64-linux-gnu/include/c++/$SET_SYSTEM_GCC_VERSION --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic --enable-silent-rules;
+    ./configure $TOOLCHAIN_PREFIX --with-sysroot=/ --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=/usr/aarch64-linux-gnu/include/c++/$SET_SYSTEM_GCC_VERSION --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic --enable-silent-rules >> $MAKE_LOG 2>&1;
 
     echo "";
     echo "";
