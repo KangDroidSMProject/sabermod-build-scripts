@@ -16,9 +16,6 @@
 
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
-# Initially define script naming form
-export FORM=$ARCH/$ARCH$TARGET-$VER
-
 # Ask for GCC Version to build
 echo "Which GCC version would you like to build?"
 
@@ -105,6 +102,6 @@ if [ $ARCH != x86_64 ]; then
 fi
 
 # Build Toolchain
-cd $ARCH;
+cd smbuild/$ARCH;
 bash $ARCH$TARGET-$VER;
 cd $ROOT_DIR;
