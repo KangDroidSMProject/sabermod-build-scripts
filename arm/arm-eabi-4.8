@@ -121,7 +121,7 @@ fi;
 
 # Set log location
 export LOG_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/smbuild/.log
-if [ !-d $LOG_PATH ];
+if [ ! -d $LOG_PATH ];
 then
     mkdir -p $LOG_PATH;
 fi;
