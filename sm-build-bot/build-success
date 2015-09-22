@@ -1,0 +1,105 @@
+#!/bin/bash
+
+# Copyright (C) 2015 The SaberMod Project
+# This file is free software; The SaberMod Project
+# gives unlimited permission to copy and/or distribute it,
+# with or without modifications, as long as this notice is preserved.
+
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY, to the extent permitted by law; without
+# even the implied warranty of MERCHANTABILITY or FITNESS FOR A
+# PARTICULAR PURPOSE.
+
+success ()
+{
+    echo "SUCCESS: $@"
+}
+
+if [ $SET_TARGET_BUILD = "CLOOG" ];
+then
+    if [ $CLOOG_INSTALLED = "yes" ];
+    then
+        echo "";
+        echo "";
+        echo "";
+success "*****************ㄅㄩςς∑ㄅㄅ*****************
+
+         CLOOG libraries have successfully built
+
+         *****************ㄅㄩςς∑ㄅㄅ*****************";
+        echo "";
+        echo "";
+        echo "";
+    fi;
+fi;
+
+if [ $SET_TARGET_BUILD = "ISL" ];
+then
+    if [ $ISL_INSTALLED = "yes" ];
+    then
+        echo "";
+        echo "";
+        echo "";
+success "*****************ㄅㄩςς∑ㄅㄅ*****************
+
+         ISL libraries have successfully built
+
+         *****************ㄅㄩςς∑ㄅㄅ*****************";
+        echo "";
+        echo "";
+        echo "";
+    fi;
+fi;
+
+if [ $SET_TARGET_BUILD = "MPFR" ];
+then
+    if [ $MPFR_INSTALLED = "yes" ];
+    then
+        echo "";
+        echo "";
+        echo "";
+success "*****************ㄅㄩςς∑ㄅㄅ*****************
+
+         MPFR libraries have successfully built
+
+         *****************ㄅㄩςς∑ㄅㄅ*****************";
+        echo "";
+        echo "";
+        echo "";
+    fi;
+fi;
+
+if [ $SET_TARGET_BUILD = "GMP" ];
+then
+    if [ $GMP_INSTALLED = "yes" ];
+    then
+        echo "";
+        echo "";
+        echo "";
+success "*****************ㄅㄩςς∑ㄅㄅ*****************
+
+         GMP libraries have successfully built
+
+         *****************ㄅㄩςς∑ㄅㄅ*****************";
+        echo "";
+        echo "";
+        echo "";
+    fi;
+fi;
+
+if [ $SET_TARGET_BUILD = "GCC" ];
+then
+    echo "";
+    echo "";
+    echo "";
+success "*****************ㄅㄩςς∑ㄅㄅ*****************
+
+         GCC has successfully built
+         The toolchain is located at:
+         $TOOLCHAIN_PREFIX_PATH
+
+         *****************ㄅㄩςς∑ㄅㄅ*****************";
+    echo "";
+    echo "";
+    echo "";
+fi;
