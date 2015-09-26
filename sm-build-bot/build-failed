@@ -10,15 +10,18 @@
 # even the implied warranty of MERCHANTABILITY or FITNESS FOR A
 # PARTICULAR PURPOSE.
 
+SHORT_LOG=`grep -r "error:" $MAKE_LOG > $LOG_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR-SHORT.log`;
+
 panic ()
 {
-    echo "ERROR: $@";
+    echo -e "${CLR_BLD_RED}ERROR:${CLR_RST} ${CLR_RED}$@${CLR_RST}";
 }
 
 if [ -n $CLOOG_INSTALLED ];
 then
     if [ $CLOOG_INSTALLED = "no" ];
     then
+        $SHORT_LOG;
         echo "";
         echo "";
         echo "";
@@ -31,8 +34,11 @@ panic "**********************************ﾓ∆ⅰﾚㄩЯ∑*******************
            sabermod.team@gmail.com
            for assistance.
 
-       Log is located at:
+       Full Log is located at:
            $MAKE_LOG
+
+       Short Log is located at:
+           $LOG_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR-SHORT.log
 
         **************************************ﾓ∆ⅰﾚㄩЯ∑**********************************";
         echo "";
@@ -45,6 +51,7 @@ if [ -n $ISL_INSTALLED ];
 then
     if [ $ISL_INSTALLED = "no" ];
     then
+        $SHORT_LOG;
         echo "";
         echo "";
         echo "";
@@ -57,8 +64,11 @@ panic "**********************************ﾓ∆ⅰﾚㄩЯ∑*******************
            sabermod.team@gmail.com
            for assistance.
 
-       Log is located at:
+       Full Log is located at:
            $MAKE_LOG
+
+       Short Log is located at:
+           $LOG_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR-SHORT.log
 
         **************************************ﾓ∆ⅰﾚㄩЯ∑**********************************";
         echo "";
@@ -69,6 +79,7 @@ fi;
 
 if [ $MPFR_INSTALLED = "no" ];
 then
+    $SHORT_LOG;
     echo "";
     echo "";
     echo "";
@@ -81,8 +92,11 @@ panic "**********************************ﾓ∆ⅰﾚㄩЯ∑*******************
          sabermod.team@gmail.com
          for assistance.
 
-       Log is located at:
-         $MAKE_LOG
+       Full Log is located at:
+           $MAKE_LOG
+
+       Short Log is located at:
+           $LOG_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR-SHORT.log
 
         **************************************ﾓ∆ⅰﾚㄩЯ∑**********************************";
     echo "";
@@ -92,6 +106,7 @@ fi;
 
 if [ $GMP_INSTALLED = "no" ];
 then
+    $SHORT_LOG;
     echo "";
     echo "";
     echo "";
@@ -104,8 +119,11 @@ panic "**********************************ﾓ∆ⅰﾚㄩЯ∑*******************
          sabermod.team@gmail.com
          for assistance.
 
-       Log is located at:
-         $MAKE_LOG
+       Full Log is located at:
+           $MAKE_LOG
+
+       Short Log is located at:
+           $LOG_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR-SHORT.log
 
         **************************************ﾓ∆ⅰﾚㄩЯ∑**********************************";
     echo "";
@@ -115,6 +133,7 @@ fi;
 
 if [ $SET_TARGET_BUILD = "GCC" ];
 then
+    $SHORT_LOG;
     echo "";
     echo "";
     echo "";
@@ -129,8 +148,11 @@ panic "**********************************ﾓ∆ⅰﾚㄩЯ∑*******************
          sabermod.team@gmail.com
          for assistance.
 
-       Log is located at:
-         $MAKE_LOG
+       Full Log is located at:
+           $MAKE_LOG
+
+       Short Log is located at:
+           $LOG_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR-SHORT.log
 
         **************************************ﾓ∆ⅰﾚㄩЯ∑**********************************";
     echo "";

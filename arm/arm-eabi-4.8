@@ -30,11 +30,11 @@ export CLR_BLD_CYA=$CLR_RST$CLR_BLD$(tput setaf 6) #  cyan, bold
 
 # Output usage help
 function showHelpAndExit {
-        echo -e "${CLR_BLD_BLU}usage: $0 <cortex(a15)> <neon(vfpv4)> ${CLR_RST}"
-        echo -e ""
-        echo -e "${CLR_BLD_BLU}options:${CLR_RST}"
-        echo -e "${CLR_BLD_BLU}  -h, --help     display this help message${CLR_RST}"
-        exit 1
+        echo -e "${CLR_BLD_BLU}usage: $0 <cortex(a15)> <neon(vfpv4)> ${CLR_RST}";
+        echo -e "";
+        echo -e "${CLR_BLD_BLU}options:${CLR_RST}";
+        echo -e "${CLR_BLD_BLU}  -h, --help     display this help message${CLR_RST}";
+        exit 1;
 }
 
 # Check twice to see if CORTEX is already defined.
@@ -43,17 +43,18 @@ then
     
     # Grab any help or cortex command-line instructions
     export CORTEX=$1;
-    shift
+    shift;
 fi;
 
 
-if [ ! -n "$CORTEX" ]; then
-        export CORTEX_FLAGS="";
+if [ ! -n "$CORTEX" ];
+then
+    export CORTEX_FLAGS="";
 fi
 
 case $CORTEX in
 -h|--help|h|help)
-        showHelpAndExit
+        showHelpAndExit;
         ;;
 a15)
         export CORTEX_FLAGS="--with-tune=cortex-a15";
@@ -70,8 +71,9 @@ then
 fi;
 
 
-if [ ! -n "$NEON" ]; then
-        export NEON_FLAGS="--with-fpu=neon";
+if [ ! -n "$NEON" ];
+then
+    export NEON_FLAGS="--with-fpu=neon";
 fi
 
 case $NEON in
@@ -154,7 +156,7 @@ then
     echo "";
     echo "";
     echo "";
-    echo "Cleaning ...";
+    echo -e "${CLR_BLD_BLU}Cleaning ...${CLR_RST}";
     make $MAKE_FLAGS clean -k > $MAKE_LOG 2>&1;
     make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
 fi;
@@ -242,7 +244,7 @@ then
     cd $HOST_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.10 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.0 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.1 && cd $BUILD_PATH;
     sleep 5;
 
-    echo "Preparing sabermod toolchain sources ...";
+    echo -e "${CLR_BLD_BLU}Preparing sabermod toolchain sources ...${CLR_RST}";
     echo "";
     echo "";
     echo "";

@@ -12,7 +12,7 @@
 
 success ()
 {
-    echo "SUCCESS: $@"
+    echo -e "${CLR_BLD_GRN}SUCCESS:${CLR_RST} ${CLR_GRN}$@${CLR_RST}"
 }
 
 if [ $SET_TARGET_BUILD = "CLOOG" ];

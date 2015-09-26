@@ -26,7 +26,7 @@ then
     echo "";
     echo "";
     echo "";
-    echo "Compiling Cloog, and cloog dependencies ...";
+    echo -e "${CLR_BLD_BLU}Compiling Cloog, and cloog dependencies ...${CLR_RST}";
     echo "";
     echo "";
     echo "";
@@ -53,7 +53,7 @@ then
     echo "";
     echo "";
     echo "";
-    echo "Compiling ISL dependencies ...";
+    echo -e "${CLR_BLD_BLU}Compiling ISL dependencies ...${CLR_RST}";
     echo "";
     echo "";
     echo "";
@@ -80,7 +80,7 @@ then
     echo "";
     echo "";
     echo "";
-    echo "Compiling MPFR dependencies ...";
+    echo -e "${CLR_BLD_BLU}Compiling MPFR dependencies ...${CLR_RST}";
     echo "";
     echo "";
     echo "";
@@ -104,7 +104,7 @@ then
     echo "";
     echo "";
     echo "";
-    echo "Compiling GMP dependencies ...";
+    echo -e "${CLR_BLD_BLU}Compiling GMP dependencies ...${CLR_RST}";
     echo "";
     echo "";
     echo "";
@@ -124,7 +124,7 @@ else
         echo "";
         echo "";
         echo "";
-        echo "Compiling sabermod toolchain $SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR ...";
+        echo -e "${CLR_BLD_BLU}Compiling sabermod toolchain $SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR ...${CLR_RST}";
 
         # Build the toolchain
         make $MAKE_FLAGS -k >> "$MAKE_LOG" 2>&1;
