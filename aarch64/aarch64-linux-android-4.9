@@ -126,12 +126,6 @@ do
     rm -rf $autom4te;
 done;
 
-# untracked files
-if [ -d gmp-gnu ];
-then
-    rm -rf gmp-gnu;
-fi;
-
 export TOOLCHAIN_PREFIX_PATH=~/tmp/$SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR;
 
 if [ -d "$TOOLCHAIN_PREFIX_PATH" ];
@@ -334,7 +328,6 @@ then
 
         # Cleanup
         rm -rf $SYSROOT_DEST_PATH;
-        rm -rf $TOOLCHAIN_PREFIX_PATH/aarch64-elf-linux;
         for la in `find $TOOLCHAIN_PREFIX_PATH -name *.la`;
         do
             rm $la;
