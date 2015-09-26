@@ -14,51 +14,71 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-# Ask to optimize for cortex-a15 device
-echo "";
-echo "";
-echo "";
-echo "Would you like to optimize gcc for cortex-a15?"
-echo "Note: this is not required if you use cortex-a15 flags in the android system and kernel."
+# red = errors, cyan = warnings, green = confirmations, blue = informational
+# plain for generic text, bold for titles, reset flag at each end of line
+# plain blue should not be used for readability reasons - use plain cyan instead
+export CLR_RST=$(tput sgr0)                        ## reset flag
+export CLR_RED=$CLR_RST$(tput setaf 1)             #  red, plain
+export CLR_GRN=$CLR_RST$(tput setaf 2)             #  green, plain
+export CLR_BLU=$CLR_RST$(tput setaf 4)             #  blue, plain
+export CLR_CYA=$CLR_RST$(tput setaf 6)             #  cyan, plain
+export CLR_BLD=$(tput bold)                        ## bold flag
+export CLR_BLD_RED=$CLR_RST$CLR_BLD$(tput setaf 1) #  red, bold
+export CLR_BLD_GRN=$CLR_RST$CLR_BLD$(tput setaf 2) #  green, bold
+export CLR_BLD_BLU=$CLR_RST$CLR_BLD$(tput setaf 4) #  blue, bold
+export CLR_BLD_CYA=$CLR_RST$CLR_BLD$(tput setaf 6) #  cyan, bold
 
-while read -p "y/Y/yes/Yes or n/N/no/No? " cchoice
-do
-case "$cchoice" in
-        y | Y | yes | Yes)
-	        export CORTEX_A15=yes;
-                export CORTEX_FLAGS="--with-tune=cortex-a15";
-                break
-                ;;
-        n | N | no | No)
-                export CORTEX_A15=no;
-                export CORTEX_FLAGS="";
-                break
-                ;;
+# Output usage help
+function showHelpAndExit {
+        echo -e "${CLR_BLD_BLU}usage: $0 <cortex(a15)> <neon(vfpv4)> ${CLR_RST}"
+        echo -e ""
+        echo -e "${CLR_BLD_BLU}options:${CLR_RST}"
+        echo -e "${CLR_BLD_BLU}  -h, --help     display this help message${CLR_RST}"
+        exit 1
+}
+
+# Check twice to see if CORTEX is already defined.
+if [ ! -n "$CORTEX" ];
+then
+    
+    # Grab any help or cortex command-line instructions
+    export CORTEX=$1;
+    shift
+fi;
+
+
+if [ ! -n "$CORTEX" ]; then
+        export CORTEX_FLAGS="";
+fi
+
+case $CORTEX in
+-h|--help|h|help)
+        showHelpAndExit
+        ;;
+a15)
+        export CORTEX_FLAGS="--with-tune=cortex-a15";
+        ;;
 esac
-done
 
-# Ask to optimize for neon-vfpv4 device
-echo "";
-echo "";
-echo "";
-echo "Would you like to optimize gcc for neon-vfpv4?"
-echo "Note: mostly used on krait and newer devices.  Do not use on very old devices"
+# Check twice to see if NEON is already defined.
+if [ ! -n "$NEON" ];
+then
+    
+    # Grab any neon command-line instructions
+    export NEON=$1;
+    shift
+fi;
 
-while read -p "y/Y/yes/Yes or n/N/no/No? " cchoice
-do
-case "$cchoice" in
-        y | Y | yes | Yes)
-                export NEON_VFPV4=yes;
-                export NEON_FLAGS="--with-fpu=neon-vfpv4";
-                break
-                ;;
-        n | N | no | No)
-                export NEON_VFPV4=no;
-                export NEON_FLAGS="--with-fpu=neon";
-                break
-                ;;
+
+if [ ! -n "$NEON" ]; then
+        export NEON_FLAGS="--with-fpu=neon";
+fi
+
+case $NEON in
+vfpv4)
+        export NEON_FLAGS="--with-fpu=neon-vfpv4";
+        ;;
 esac
-done
 
 # Some predefined configurations
 export SET_GCC_VERSION=4.8.5;

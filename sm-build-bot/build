@@ -144,5 +144,7 @@ else
         unset CORTEX_A15;
         unset NEON_VFPV4;
         unset CPLUS_INCLUDE_PATH;
+        unset CORTEX;
+        unset NEON;
     fi;
 fi;

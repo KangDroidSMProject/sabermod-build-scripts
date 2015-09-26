@@ -14,6 +14,11 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
+# Export any command-line options
+
+export CORTEX=$1;
+export NEON=$2;
+
 ROOT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
 # Ask for GCC Version to build
