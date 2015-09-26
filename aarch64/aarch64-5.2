@@ -48,7 +48,6 @@ done
 export SET_TARGET_GCC_VERSION=5.2.0;
 export SET_TARGET_GCC_MAJOR=5;
 export SET_TARGET_GCC_MINOR=2;
-export SET_SYSTEM_GCC_VERSION=5.1.1;
 export SET_ISL_VERSION=0.15;
 export SET_HOST_BUILD=x86_64-linux-gnu;
 export SET_TARGET=aarch64-linux-gnu;
@@ -282,18 +281,25 @@ then
     echo "";
     echo "";
 
+    # sysroot
+    cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard >> $MAKE_LOG 2>&1 && git fetch sm gcc-5.0 >> $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1 && cd $BUILD_PATH;
+    export SYSROOT_SRC_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/sysroot/arch-arm64;
+    export SYSROOT_DEST_PATH=$TOOLCHAIN_PREFIX_PATH/arch-arm64;
+    cp -R $SYSROOT_SRC_PATH -f $SYSROOT_DEST_PATH;
+    export SYSROOT=--with-sysroot=$SYSROOT_DEST_PATH;
+
     # Make sure gcc is on the right remote branch 5.2.x
     # Remove all and git reset --hard so there's no conflicts between branches
     cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard >> $MAKE_LOG 2>&1 && git fetch smhub $SET_TARGET_GCC_VERSION >> $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1 && cd $BUILD_PATH;
 
-    # make libs available for ld
-    export LD_LIBRARY_PATH=$HOST_LIB_PATH:/usr/aarch64-linux-gnu/lib;
+    export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
+    export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$HOST_LIB_PATH;
     export C_INCLUDE_PATH=$HOST_INC_PATH;
     export CPLUS_INCLUDE_PATH=$HOST_INC_PATH;
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
-    ./configure $TOOLCHAIN_PREFIX --with-sysroot=/ --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-&' --with-gcc-version=SaberMod --with-binutils-version=gnu --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=/usr/aarch64-linux-gnu/include/c++/$SET_SYSTEM_GCC_VERSION --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic --enable-silent-rules --enable-gnu-indirect-function >> $MAKE_LOG 2>&1;
+    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-ld=default --disable-gold --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --disable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --enable-multilib --with-libexpat --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --disable-libsanitizer --disable-libgomp --disable-libatomic --enable-silent-rules --enable-gnu-indirect-function >> $MAKE_LOG 2>&1;
 
     echo "";
     echo "";
@@ -319,7 +325,6 @@ then
 
         # Cleanup
         rm -rf $SYSROOT_DEST_PATH;
-        rm -rf $TOOLCHAIN_PREFIX_PATH/aarch64-elf-linux;
         for la in `find $TOOLCHAIN_PREFIX_PATH -name *.la`;
         do
             rm $la;
