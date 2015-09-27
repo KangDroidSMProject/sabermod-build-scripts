@@ -373,10 +373,9 @@ then
         # these files.
         GCC_EXECUTE="$TOOLCHAIN_PREFIX_PATH/bin/./$SET_TARGET_GCC";
         `$GCC_EXECUTE --version > $TOOLCHAIN_PREFIX_PATH/VERSION`;
-        `$GCC_EXECUTE -v > $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG`;
+        `$GCC_EXECUTE -v`;
 
-        echo "" >> $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
-        echo "Sources read: https://gitlab.com/SaberMod/sabermod-manifest/blob/master/README.md" >> $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
+        echo "Sources read: https://gitlab.com/SaberMod/sabermod-manifest/blob/master/README.md" >> $TOOLCHAIN_PREFIX_PATH/SOURCES;
 
         ./build-success;
     else
