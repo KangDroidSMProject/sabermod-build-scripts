@@ -114,6 +114,7 @@ cd /tmp && ln -s $TOOLCHAIN_ROOT /tmp/sm-tc && cd /tmp/sm-tc;
 export TOOLCHAIN_ROOT_SYMBOLIC="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
 export BUILD_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/build;
+cd $BUILD_PATH;
 
 # Try to overclock a little by adding two extra threads to shorten build time.
 # Only supported up to 16 cores, after which it's automatic.
