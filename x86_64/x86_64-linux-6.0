@@ -292,7 +292,6 @@ then
     # Did we make it?
     if [ -e $GCC_INSTALLED ] && [ -n "$FIND_LIB_GCC" ];
     then
-        ./build-success;
 
         # Cleanup
         rm -rf $SYSROOT_DEST_PATH;
@@ -314,11 +313,14 @@ then
         # With these the android ROM sabermod-vendor will no longer
         # need to read binary string information.  Instead it can read
         # these files.
-        `./$GCC_INSTALLED --version` > $TOOLCHAIN_PREFIX_PATH/VERSION;
-        `./$GCC_INSTALLED -v` > $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
+        GCC_EXECUTE="$TOOLCHAIN_PREFIX_PATH/bin/./$SET_TARGET_GCC";
+        `$GCC_EXECUTE --version > $TOOLCHAIN_PREFIX_PATH/VERSION`;
+        `$GCC_EXECUTE -v > $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG`;
 
         echo "" >> $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
         echo "Sources read: https://gitlab.com/SaberMod/sabermod-manifest/blob/master/README.md" >> $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
+
+        ./build-success;
     else
         ./build-failed;
     fi;
