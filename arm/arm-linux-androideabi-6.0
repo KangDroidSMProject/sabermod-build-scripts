@@ -365,9 +365,15 @@ then
             rm $cmake;
         done;
 
-        # Install prebuilt ld.mcld and create a symbolic link for exec
-        cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.x/bin/$SET_TARGET-ld.mcld $TOOLCHAIN_PREFIX_PATH/bin/$SET_TARGET-ld.mcld;
-        cd $TOOLCHAIN_PREFIX_PATH/$SET_TARGET/bin && ln ../../bin/$SET_TARGET-ld.mcld -s ld.mcld;
+        # Create VERSION and GCC-CONFIG files
+        # With these the android ROM sabermod-vendor will no longer
+        # need to read binary string information.  Instead it can read
+        # these files.
+        `$GCC_INSTALLED --version` > $TOOLCHAIN_PREFIX_PATH/VERSION;
+        `$GCC_INSTALLED -v` > $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
+
+        echo "" >> $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
+        echo "Sources read: https://gitlab.com/SaberMod/sabermod-manifest/blob/master/README.md" >> $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
     else
         ./build-failed;
     fi;

@@ -367,6 +367,16 @@ then
         cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.x/lib/libgomp-plugin-host_nonshm.a $HOST_LIB_PATH/libgomp-plugin-host_nonshm.a;
         cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.x/lib/libgomp.spec $HOST_LIB_PATH/libgomp.spec;
         cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.x/include/omp.h $HOST_INC_PATH/omp.h;
+
+        # Create VERSION and GCC-CONFIG files
+        # With these the android ROM sabermod-vendor will no longer
+        # need to read binary string information.  Instead it can read
+        # these files.
+        `$GCC_INSTALLED --version` > $TOOLCHAIN_PREFIX_PATH/VERSION;
+        `$GCC_INSTALLED -v` > $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
+
+        echo "" >> $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
+        echo "Sources read: https://gitlab.com/SaberMod/sabermod-manifest/blob/master/README.md" >> $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
     else
         ./build-failed;
     fi;
