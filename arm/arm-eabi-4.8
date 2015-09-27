@@ -257,7 +257,7 @@ then
     export SYSROOT=--with-sysroot=$SYSROOT_DEST_PATH;
 
     # Make sure ISL is on the right 0.15 branch
-    cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm gcc-5-fedora >> $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1;
+    cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm gcc-5 >> $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1;
 
     # Make sure gcc is on the right remote branch 4.8.x
     cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard >> $MAKE_LOG 2>&1 && git fetch smhub $SET_GCC_VERSION >> $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1 && cd $BUILD_PATH;
