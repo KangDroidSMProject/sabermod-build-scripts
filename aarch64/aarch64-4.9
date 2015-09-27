@@ -362,8 +362,8 @@ then
         # With these the android ROM sabermod-vendor will no longer
         # need to read binary string information.  Instead it can read
         # these files.
-        `$GCC_INSTALLED --version` > $TOOLCHAIN_PREFIX_PATH/VERSION;
-        `$GCC_INSTALLED -v` > $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
+        `./$GCC_INSTALLED --version` > $TOOLCHAIN_PREFIX_PATH/VERSION;
+        `./$GCC_INSTALLED -v` > $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
 
         echo "" >> $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
         echo "Sources read: https://gitlab.com/SaberMod/sabermod-manifest/blob/master/README.md" >> $TOOLCHAIN_PREFIX_PATH/GCC-CONFIG;
