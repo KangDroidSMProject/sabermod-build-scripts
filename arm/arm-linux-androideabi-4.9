@@ -394,7 +394,7 @@ then
         # With these the android ROM sabermod-vendor will no longer
         # need to read binary string information.  Instead it can read
         # these files.
-        GCC_EXECUTE="$TOOLCHAIN_PREFIX_PATH/bin/./$SET_TARGET_GCC";
+        GCC_EXECUTE="$TOOLCHAIN_PREFIX_PATH/bin/./$SET_TARGET-gcc";
         `$GCC_EXECUTE --version > $TOOLCHAIN_PREFIX_PATH/VERSION`;
         `$GCC_EXECUTE -v`;
 
