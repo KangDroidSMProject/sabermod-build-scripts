@@ -400,6 +400,8 @@ then
 
         echo "Sources read: https://gitlab.com/SaberMod/sabermod-manifest/blob/master/README.md" >> $TOOLCHAIN_PREFIX_PATH/SOURCES;
 
+        cd $BUILD_PATH;
+
         ./build-success;
     else
         ./build-failed;
