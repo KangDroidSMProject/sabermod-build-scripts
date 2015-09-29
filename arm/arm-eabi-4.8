@@ -30,7 +30,7 @@ export CLR_BLD_CYA=$CLR_RST$CLR_BLD$(tput setaf 6) #  cyan, bold
 
 # Output usage help
 function showHelpAndExit {
-        echo -e "${CLR_BLD_BLU}usage: $0 <cortex(a15)> <neon(vfpv4)> ${CLR_RST}";
+        echo -e "${CLR_BLD_BLU}usage: $0 <cortex(a7)(a9)(a15)> <neon(vfpv4)> ${CLR_RST}";
         echo -e "";
         echo -e "${CLR_BLD_BLU}options:${CLR_RST}";
         echo -e "${CLR_BLD_BLU}  -h, --help     display this help message${CLR_RST}";
@@ -50,11 +50,17 @@ fi;
 if [ ! -n "$CORTEX" ];
 then
     export CORTEX_FLAGS="";
-fi
+fi;
 
 case $CORTEX in
 -h|--help|h|help)
         showHelpAndExit;
+        ;;
+a7)
+        export CORTEX_FLAGS="--with-tune=cortex-a7";
+        ;;
+a9)
+        export CORTEX_FLAGS="--with-tune=cortex-a9";
         ;;
 a15)
         export CORTEX_FLAGS="--with-tune=cortex-a15";
@@ -263,7 +269,7 @@ then
     # Make sure gcc is on the right remote branch 4.8.x
     cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard >> $MAKE_LOG 2>&1 && git fetch smhub $SET_GCC_VERSION >> $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1 && cd $BUILD_PATH;
 
-    # make libs available for ld
+    # make libs and includes available
     export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
     export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$HOST_LIB_PATH;
     export C_INCLUDE_PATH=$HOST_INC_PATH;
