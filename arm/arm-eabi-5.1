@@ -14,59 +14,79 @@
 #   See the License for the specific language governing permissions and
 #   limitations under the License.
 
-###########################################################################
-###########################################################################
-#####
-#####  C O N F I G U R A T I O N
-#####
-###########################################################################
-###########################################################################
+# red = errors, cyan = warnings, green = confirmations, blue = informational
+# plain for generic text, bold for titles, reset flag at each end of line
+# plain blue should not be used for readability reasons - use plain cyan instead
+export CLR_RST=$(tput sgr0)                        ## reset flag
+export CLR_RED=$CLR_RST$(tput setaf 1)             #  red, plain
+export CLR_GRN=$CLR_RST$(tput setaf 2)             #  green, plain
+export CLR_BLU=$CLR_RST$(tput setaf 4)             #  blue, plain
+export CLR_CYA=$CLR_RST$(tput setaf 6)             #  cyan, plain
+export CLR_BLD=$(tput bold)                        ## bold flag
+export CLR_BLD_RED=$CLR_RST$CLR_BLD$(tput setaf 1) #  red, bold
+export CLR_BLD_GRN=$CLR_RST$CLR_BLD$(tput setaf 2) #  green, bold
+export CLR_BLD_BLU=$CLR_RST$CLR_BLD$(tput setaf 4) #  blue, bold
+export CLR_BLD_CYA=$CLR_RST$CLR_BLD$(tput setaf 6) #  cyan, bold
 
-# Ask to optimize for cortex-a15 device
-echo "";
-echo "";
-echo "";
-echo "Would you like to optimize gcc for cortex-a15?"
-echo "Note: this is not required if you use cortex-a15 flags in the android system and kernel."
+# Output usage help
+function showHelpAndExit {
+        echo -e "${CLR_BLD_BLU}usage: $0 <cortex(a7)(a9)(a15)> <neon(vfpv4)> ${CLR_RST}";
+        echo -e "";
+        echo -e "${CLR_BLD_BLU}options:${CLR_RST}";
+        echo -e "${CLR_BLD_BLU}  -h, --help     display this help message${CLR_RST}";
+        exit 1;
+}
 
-while read -p "y/Y/yes/Yes or n/N/no/No? " cchoice
-do
-case "$cchoice" in
-        y | Y | yes | Yes)
-	        export CORTEX_A15=yes;
-                export CORTEX_FLAGS="--with-tune=cortex-a15";
-                break
-                ;;
-        n | N | no | No)
-                export CORTEX_A15=no;
-                export CORTEX_FLAGS="";
-                break
-                ;;
+# Check twice to see if CORTEX is already defined.
+if [ ! -n "$CORTEX" ];
+then
+    
+    # Grab any help or cortex command-line instructions
+    export CORTEX=$1;
+    shift;
+fi;
+
+
+if [ ! -n "$CORTEX" ];
+then
+    export CORTEX_FLAGS="";
+fi;
+
+case $CORTEX in
+-h|--help|h|help)
+        showHelpAndExit;
+        ;;
+a7)
+        export CORTEX_FLAGS="--with-tune=cortex-a7";
+        ;;
+a9)
+        export CORTEX_FLAGS="--with-tune=cortex-a9";
+        ;;
+a15)
+        export CORTEX_FLAGS="--with-tune=cortex-a15";
+        ;;
 esac
-done
 
-# Ask to optimize for neon-vfpv4 device
-echo "";
-echo "";
-echo "";
-echo "Would you like to optimize gcc for neon-vfpv4?"
-echo "Note: mostly used on krait and newer devices.  Do not use on very old devices"
+# Check twice to see if NEON is already defined.
+if [ ! -n "$NEON" ];
+then
+    
+    # Grab any neon command-line instructions
+    export NEON=$1;
+    shift
+fi;
 
-while read -p "y/Y/yes/Yes or n/N/no/No? " cchoice
-do
-case "$cchoice" in
-        y | Y | yes | Yes)
-                export NEON_VFPV4=yes;
-                export NEON_FLAGS="--with-fpu=neon-vfpv4";
-                break
-                ;;
-        n | N | no | No)
-                export NEON_VFPV4=no;
-                export NEON_FLAGS="--with-fpu=neon";
-                break
-                ;;
+
+if [ ! -n "$NEON" ];
+then
+    export NEON_FLAGS="--with-fpu=neon";
+fi
+
+case $NEON in
+vfpv4)
+        export NEON_FLAGS="--with-fpu=neon-vfpv4";
+        ;;
 esac
-done
 
 # Some predefined configurations
 export SET_GCC_VERSION=5.1.1;
@@ -96,13 +116,10 @@ fi;
 cd ../../;
 export TOOLCHAIN_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 cd /tmp && ln -s $TOOLCHAIN_ROOT /tmp/sm-tc && cd /tmp/sm-tc;
-
 export TOOLCHAIN_ROOT_SYMBOLIC="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 
-cd $TOOLCHAIN_ROOT_SYMBOLIC/build;
-
-# Build PATH
-export BUILD_PATH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
+export BUILD_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/build;
+cd $BUILD_PATH;
 
 # Try to overclock a little by adding two extra threads to shorten build time.
 # Only supported up to 16 cores, after which it's automatic.
@@ -131,7 +148,13 @@ else
 fi;
 
 # Set log location
-export MAKE_LOG=$BUILD_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR.log;
+export LOG_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/smbuild/.log
+if [ ! -d $LOG_PATH ];
+then
+    mkdir -p $LOG_PATH;
+fi;
+
+export MAKE_LOG=$LOG_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR.log;
 
 # Make a clean build
 if [ -e Makefile ];
@@ -139,7 +162,7 @@ then
     echo "";
     echo "";
     echo "";
-    echo "Cleaning ...";
+    echo -e "${CLR_BLD_BLU}Cleaning ...${CLR_RST}";
     make $MAKE_FLAGS clean -k > $MAKE_LOG 2>&1;
     make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
 fi;
@@ -149,12 +172,6 @@ for autom4te in `find $TOOLCHAIN_ROOT_SYMBOLIC -type d -name autom4te.cache`;
 do
     rm -rf $autom4te;
 done;
-
-# untracked files
-if [ -d gmp-gnu ];
-then
-    rm -rf gmp-gnu;
-fi;
 
 export TOOLCHAIN_PREFIX_PATH=~/tmp/$SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR;
 
@@ -176,11 +193,12 @@ export MPFR_INSTALLED=$HOST_LIB_PATH/libmpfr.so.$TARGET_MPFR_LIB_VERSION;
 export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.so.$TARGET_GMP_LIB_VERSION;
 
 # ISL
-
 export SET_TARGET_BUILD=ISL;
 
-# Build and install isl into the toolchain.
+# Prepare ISL.
 cd $TOOLCHAIN_ROOT_SYMBOLIC/isl/isl-$SET_ISL_VERSION && git fetch sm gcc-5 > $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1;
+
+bash $SMBUILD;
 
 # ISL Build Configuration
 ./configure $HOST_PREFIX --with-gmp=system --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET >> $MAKE_LOG 2>&1;
@@ -205,90 +223,33 @@ else
     export ISL_INSTALLED=no;
 fi;
 
-# cleanup
-make $MAKE_FLAGS clean -k >> $MAKE_LOG 2>&1;
-make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
-
-# untracked files
-rm -rf gitversion.h include/isl/stdint.h isl-uninstalled.pc isl-uninstalled.sh isl.pc isl/isl.pc.in;
-
-git reset --hard >> $MAKE_LOG 2>&1;
-
 # MPFR
 export SET_TARGET_BUILD=MPFR;
 
-# Build and install mpfr libraries into the toolchain.
-
-# MPFR Build Configuration
-cd $TOOLCHAIN_ROOT_SYMBOLIC/mpfr/mpfr-gnu && ./configure $HOST_PREFIX --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET >> $MAKE_LOG 2>&1;
-
-echo "";
-echo "";
-echo "";
-echo "Compiling MPFR dependencies ...";
-echo "";
-echo "";
-echo "";
-
-make $MAKE_FLAGS -k >> $MAKE_LOG 2>&1;
-make install -k >> $MAKE_LOG 2>&1;
+bash $SMBUILD;
 
 # Is MPFR Installed?
 if [ -e $MPFR_INSTALLED ];
 then
     export MPFR_INSTALLED=yes;
-    bash $BUILD_PATH/build-success;
+    bash $SMSUCCESS;
 else
     export MPFR_INSTALLED=no;
 fi;
 
-# cleanup
-make $MAKE_FLAGS clean -k >> $MAKE_LOG 2>&1;
-make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
-if [ -d autom4te.cache ];
-then
-    rm -rf autom4te.cache;
-fi;
-
-git reset --hard >> $MAKE_LOG 2>&1;
-
 # GMP
 export SET_TARGET_BUILD=GMP;
 
-# Build and install gmp libraries into the toolchain.
-
-# GMP Build Configuration
-cd $TOOLCHAIN_ROOT_SYMBOLIC/gmp/gmp-gnu && ./configure $HOST_PREFIX >> $MAKE_LOG 2>&1;
-
-echo "";
-echo "";
-echo "";
-echo "Compiling GMP dependencies ...";
-echo "";
-echo "";
-echo "";
-
-make $MAKE_FLAGS -k >> $MAKE_LOG 2>&1;
-make install -k >> $MAKE_LOG 2>&1;
+bash $SMBUILD;
 
 # Is GMP Installed?
 if [ -e $GMP_INSTALLED ];
 then
     export GMP_INSTALLED=yes;
-    bash $BUILD_PATH/build-success;
+    bash $SMSUCCESS;
 else
     export GMP_INSTALLED=no;
 fi;
-
-# cleanup
-make $MAKE_FLAGS clean -k >> $MAKE_LOG 2>&1;
-make $MAKE_FLAGS distclean -k >> $MAKE_LOG 2>&1;
-if [ -d autom4te.cache ];
-then
-    rm -rf autom4te.cache;
-fi;
-
-git reset --hard >> $MAKE_LOG 2>&1;
 
 cd $BUILD_PATH;
 
@@ -300,7 +261,7 @@ then
     cd $HOST_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.10 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.0 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.1 && cd $BUILD_PATH;
     sleep 5;
 
-    echo "Preparing sabermod toolchain sources ...";
+    echo -e "${CLR_BLD_BLU}Preparing sabermod toolchain sources ...${CLR_RST}";
     echo "";
     echo "";
     echo "";
@@ -325,18 +286,10 @@ then
     # GCC Build Configuration
     ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-gold --enable-ld=default --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --disable-bootstrap --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --disable-libquadmath --disable-libatomic --disable-libgomp --enable-libsanitizer --enable-silent-rules --enable-shared --enable-static --enable-initfini-array --enable-plugins >> $MAKE_LOG 2>&1;
 
-    echo "";
-    echo "";
-    echo "";
-    echo "Compiling sabermod toolchain $SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR ...";
-
-    # Build the toolchain
-    make $MAKE_FLAGS -k >> $MAKE_LOG 2>&1;
-
-    # Install the toolchain (twice)
-    make install -k >> $MAKE_LOG 2>&1 && make install -k >> $MAKE_LOG 2>&1;
-
     export SET_TARGET_BUILD=GCC;
+
+    bash $SMBUILD;
+
     export GCC_INSTALLED=$TOOLCHAIN_PREFIX_PATH/bin/$SET_TARGET_GCC;
 
     FIND_LIB_GCC=`find $TOOLCHAIN_PREFIX_PATH -name libgcc.a`;
@@ -377,27 +330,12 @@ then
 
         echo "Sources read: https://gitlab.com/SaberMod/sabermod-manifest/blob/master/README.md" >> $TOOLCHAIN_PREFIX_PATH/SOURCES;
 
-        cd $BUILD_PATH;
-
-        ./build-success;
+        bash $SMSUCCESS;
     else
-        ./build-failed;
+        bash $SMFAILED;
     fi;
 else
-    ./build-failed;
+    bash $SMFAILED;
 fi;
 
 cd $SABERMOD_BUILD_ARCH;
-
-# Clear variables
-unset ENABLE_O3;
-unset ENABLE_PTHREAD;
-unset SET_TARGET_GCC;
-unset LD_LIBRARY_PATH;
-unset C_INCLUDE_PATH;
-unset gcc_cv_use_emutls;
-unset libgomp_cv_have_attribute_visibility;
-unset VER;
-unset CORTEX_A15;
-unset NEON_VFPV4;
-unset CPLUS_INCLUDE_PATH;
