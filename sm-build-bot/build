@@ -75,7 +75,7 @@ then
 
     # Build and install mpfr libraries into the toolchain.
     # MPFR Build Configuration
-    cd $TOOLCHAIN_ROOT_SYMBOLIC/mpfr/mpfr-gnu && ./configure $HOST_PREFIX --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --enable-shared --enable-static >> $MAKE_LOG 2>&1;
+    cd $TOOLCHAIN_ROOT_SYMBOLIC/mpfr/mpfr-gnu && ./configure $HOST_PREFIX --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --disable-shared --enable-static >> $MAKE_LOG 2>&1;
 
     echo "";
     echo "";
