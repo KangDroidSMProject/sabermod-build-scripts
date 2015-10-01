@@ -17,12 +17,14 @@ panic ()
     echo -e "${CLR_BLD_RED}ERROR:${CLR_RST} ${CLR_RED}$@${CLR_RST}";
 }
 
-if [ $CLOOG_INSTALLED = "no" ];
+if [ -n $CLOOG_INSTALLED ];
 then
-    $SHORT_LOG;
-    echo "";
-    echo "";
-    echo "";
+    if [ $CLOOG_INSTALLED = "no" ];
+    then
+        $SHORT_LOG;
+        echo "";
+        echo "";
+        echo "";
 panic "**********************************ﾓ∆ⅰﾚㄩЯ∑**********************************
 
        Sorry your build failed because
@@ -39,16 +41,20 @@ panic "**********************************ﾓ∆ⅰﾚㄩЯ∑*******************
            $LOG_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR-SHORT.log
 
         **************************************ﾓ∆ⅰﾚㄩЯ∑**********************************";
-    echo "";
-    echo "";
-    echo "";
+        echo "";
+        echo "";
+        echo "";
+    fi;
+fi;
 
-elif [ $ISL_INSTALLED = "no" ];
+if [ -n $ISL_INSTALLED ];
 then
-    $SHORT_LOG;
-    echo "";
-    echo "";
-    echo "";
+    if [ $ISL_INSTALLED = "no" ];
+    then
+        $SHORT_LOG;
+        echo "";
+        echo "";
+        echo "";
 panic "**********************************ﾓ∆ⅰﾚㄩЯ∑**********************************
 
        Sorry your build failed because
@@ -65,37 +71,13 @@ panic "**********************************ﾓ∆ⅰﾚㄩЯ∑*******************
            $LOG_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR-SHORT.log
 
         **************************************ﾓ∆ⅰﾚㄩЯ∑**********************************";
-    echo "";
-    echo "";
-    echo "";
+        echo "";
+        echo "";
+        echo "";
+    fi;
+fi;
 
-elif [ $MPC_INSTALLED = "no" ];
-then
-    $SHORT_LOG;
-    echo "";
-    echo "";
-    echo "";
-panic "**********************************ﾓ∆ⅰﾚㄩЯ∑**********************************
-
-       Sorry your build failed because
-       host MPC libraries failed to install
-
-       Email log to:
-         sabermod.team@gmail.com
-         for assistance.
-
-       Full Log is located at:
-           $MAKE_LOG
-
-       Short Log is located at:
-           $LOG_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR-SHORT.log
-
-        **************************************ﾓ∆ⅰﾚㄩЯ∑**********************************";
-    echo "";
-    echo "";
-    echo "";
-
-elif [ $MPFR_INSTALLED = "no" ];
+if [ $MPFR_INSTALLED = "no" ];
 then
     $SHORT_LOG;
     echo "";
@@ -120,8 +102,9 @@ panic "**********************************ﾓ∆ⅰﾚㄩЯ∑*******************
     echo "";
     echo "";
     echo "";
+fi;
 
-elif [ $GMP_INSTALLED = "no" ];
+if [ $GMP_INSTALLED = "no" ];
 then
     $SHORT_LOG;
     echo "";
@@ -146,13 +129,14 @@ panic "**********************************ﾓ∆ⅰﾚㄩЯ∑*******************
     echo "";
     echo "";
     echo "";
-else
-    if [ $SET_TARGET_BUILD = "GCC" ];
-    then
-        $SHORT_LOG;
-        echo "";
-        echo "";
-        echo "";
+fi;
+
+if [ $SET_TARGET_BUILD = "GCC" ];
+then
+    $SHORT_LOG;
+    echo "";
+    echo "";
+    echo "";
 panic "**********************************ﾓ∆ⅰﾚㄩЯ∑**********************************
 
        GCC has failed to build
@@ -171,10 +155,9 @@ panic "**********************************ﾓ∆ⅰﾚㄩЯ∑*******************
            $LOG_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR-SHORT.log
 
         **************************************ﾓ∆ⅰﾚㄩЯ∑**********************************";
-        echo "";
-        echo "";
-        echo "";
-    fi;
+    echo "";
+    echo "";
+    echo "";
 fi;
 
 unset CLOOG_INSTALLED;

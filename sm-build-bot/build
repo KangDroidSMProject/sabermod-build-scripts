@@ -70,30 +70,6 @@ then
 
     git reset --hard >> $MAKE_LOG 2>&1;
 
-elif [ $SET_TARGET_BUILD = "MPC" ];
-then
-
-    # Build and install mpc libraries into the toolchain.
-    # MPFR Build Configuration
-    cd $TOOLCHAIN_ROOT_SYMBOLIC/mpc/mpc-gnu && ./configure $HOST_PREFIX --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --disable-shared --enable-static >> $MAKE_LOG 2>&1;
-
-    echo "";
-    echo "";
-    echo "";
-    echo -e "${CLR_BLD_BLU}Compiling MPC dependencies ...${CLR_RST}";
-    echo "";
-    echo "";
-    echo "";
-
-    make $MAKE_FLAGS -k >> "$MAKE_LOG" 2>&1;
-    make install -k >> "$MAKE_LOG" 2>&1;
-
-    # cleanup
-    make $MAKE_FLAGS clean -k >> "$MAKE_LOG" 2>&1;
-    make $MAKE_FLAGS distclean -k >> "$MAKE_LOG" 2>&1;
-
-    git reset --hard >> $MAKE_LOG 2>&1;
-
 elif [ $SET_TARGET_BUILD = "MPFR" ];
 then
 
