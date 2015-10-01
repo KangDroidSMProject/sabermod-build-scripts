@@ -31,6 +31,7 @@ success "*****************ㄅㄩςς∑ㄅㄅ*****************
         echo "";
         echo "";
     fi;
+
 elif [ $SET_TARGET_BUILD = "ISL" ];
 then
     if [ $ISL_INSTALLED = "yes" ];
@@ -47,6 +48,24 @@ success "*****************ㄅㄩςς∑ㄅㄅ*****************
         echo "";
         echo "";
     fi;
+
+elif [ $SET_TARGET_BUILD = "MPC" ];
+then
+    if [ $MPC_INSTALLED = "yes" ];
+    then
+        echo "";
+        echo "";
+        echo "";
+success "*****************ㄅㄩςς∑ㄅㄅ*****************
+
+         MPC libraries have successfully built
+
+         *****************ㄅㄩςς∑ㄅㄅ*****************";
+        echo "";
+        echo "";
+        echo "";
+    fi;
+
 elif [ $SET_TARGET_BUILD = "MPFR" ];
 then
     if [ $MPFR_INSTALLED = "yes" ];
@@ -63,6 +82,7 @@ success "*****************ㄅㄩςς∑ㄅㄅ*****************
         echo "";
         echo "";
     fi;
+
 elif [ $SET_TARGET_BUILD = "GMP" ];
 then
     if [ $GMP_INSTALLED = "yes" ];

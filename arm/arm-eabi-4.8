@@ -192,6 +192,7 @@ export HOST_LIB_PATH=$HOST_PREFIX_PATH/lib;
 export HOST_INC_PATH=$HOST_PREFIX_PATH/include;
 export HOST_PREFIX=--prefix=$HOST_PREFIX_PATH;
 export CLOOG_INSTALLED=$HOST_LIB_PATH/libcloog-isl.a;
+export MPC_INSTALLED=$HOST_LIB_PATH/libmpc.a;
 export MPFR_INSTALLED=$HOST_LIB_PATH/libmpfr.a;
 export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.a;
 
@@ -213,6 +214,20 @@ then
     bash $SMSUCCESS;
 else
     export CLOOG_INSTALLED=no;
+fi;
+
+# MPC
+export SET_TARGET_BUILD=MPC;
+
+bash $SMBUILD;
+
+# Is MPC Installed?
+if test -f $MPC_INSTALLED;
+then
+    export MPC_INSTALLED=yes;
+    bash $SMSUCCESS;
+else
+    export MPC_INSTALLED=no;
 fi;
 
 # MPFR
@@ -246,7 +261,7 @@ fi;
 cd $BUILD_PATH;
 
 # Did we make it?
-if [ $CLOOG_INSTALLED = "yes" ] && [ $MPFR_INSTALLED = "yes" ] && [ $GMP_INSTALLED = "yes" ];
+if [ $CLOOG_INSTALLED = "yes" ] && [ $MPC_INSTALLED = "yes" ] && [ $MPFR_INSTALLED = "yes" ] && [ $GMP_INSTALLED = "yes" ];
 then
 
     sleep 5;
