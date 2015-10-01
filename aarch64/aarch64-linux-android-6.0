@@ -46,7 +46,6 @@ then
     shift;
 fi;
 
-
 if [ ! "$CORTEX" ];
 then
     unset CORTEX_FLAGS;
@@ -58,38 +57,11 @@ then
     -h|--help|h|help)
             showHelpAndExit;
             ;;
-    a7)
-            export CORTEX_FLAGS="--with-tune=cortex-a7";
+    a53)
+            export CORTEX_FLAGS="--with-tune=cortex-a53";
             ;;
-    a9)
-            export CORTEX_FLAGS="--with-tune=cortex-a9";
-            ;;
-    a15)
-            export CORTEX_FLAGS="--with-tune=cortex-a15";
-            ;;
-    esac
-fi;
-
-# Check twice to see if NEON is already defined.
-if [ ! "$NEON" ];
-then
-    
-    # Grab any neon command-line instructions
-    export NEON=$1;
-    shift
-fi;
-
-
-if [ ! "$NEON" ];
-then
-    export NEON_FLAGS="--with-fpu=neon";
-fi
-
-if [ "$NEON" ];
-then
-    case $NEON in
-    vfpv4)
-            export NEON_FLAGS="--with-fpu=neon-vfpv4";
+    a57)
+            export CORTEX_FLAGS="--with-tune=cortex-a57";
             ;;
     esac
 fi;
@@ -98,10 +70,11 @@ fi;
 export SET_GCC_VERSION=6.0.0;
 export SET_TARGET_GCC_MAJOR=6;
 export SET_TARGET_GCC_MINOR=0;
+export SET_CLOOG_VERSION=0.18.4;
 export SET_ISL_VERSION=0.15;
 export SET_HOST_BUILD=x86_64-linux-gnu;
-export SET_TARGET=arm-linux-gnueabi;
-export SET_TARGET_GCC=arm-eabi-gcc;
+export SET_TARGET=aarch64-linux-android;
+export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-aosp-sabermod";
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 export SABERMOD_BUILD_ARCH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 export ENABLE_O3="-O3";
@@ -199,6 +172,7 @@ export SMBUILD_BOT_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/smbuild/sm-build-bot;
 export SMBUILD=$SMBUILD_BOT_PATH/build;
 export SMSUCCESS=$SMBUILD_BOT_PATH/build-success;
 export SMFAILED=$SMBUILD_BOT_PATH/build-failed;
+export SMMAKEARM=$SMBUILD_BOT_PATH/and-makefiles-aarch64;
 
 export SET_TARGET_BUILD=ISL;
 
@@ -259,15 +233,15 @@ then
 
     # sysroot
     cd $TOOLCHAIN_ROOT_SYMBOLIC/sysroot && rm -rf * && git reset --hard >> $MAKE_LOG 2>&1 && git fetch sm gcc-5.0 >> $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1 && cd $BUILD_PATH;
-    export SYSROOT_SRC_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/sysroot/arch-arm;
-    export SYSROOT_DEST_PATH=$TOOLCHAIN_PREFIX_PATH/arch-arm;
+    export SYSROOT_SRC_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/sysroot/arch-arm64;
+    export SYSROOT_DEST_PATH=$TOOLCHAIN_PREFIX_PATH/arch-arm64;
     cp -R $SYSROOT_SRC_PATH -f $SYSROOT_DEST_PATH;
     export SYSROOT=--with-sysroot=$SYSROOT_DEST_PATH;
-
+    
     # Make sure gcc is on the right remote branch 6.0.x
-    cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard >> $MAKE_LOG 2>&1 && git fetch smhub $SET_GCC_VERSION >> $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1 && cd $BUILD_PATH;
+    # Remove all and git reset --hard so there's no conflicts between branches
+    cd "$TOOLCHAIN_ROOT_SYMBOLIC/gcc/gcc-SaberMod" && rm -rf * && git reset --hard >> $MAKE_LOG 2>&1 && git fetch smhub $SET_TARGET_GCC_VERSION >> $MAKE_LOG 2>&1 && git checkout FETCH_HEAD >> $MAKE_LOG 2>&1 && cd $BUILD_PATH;
 
-    # make libs available for ld
     export SYSROOT_LIB_PATH=$SYSROOT_DEST_PATH/usr/lib;
     export LD_LIBRARY_PATH=$SYSROOT_LIB_PATH:$HOST_LIB_PATH;
     export C_INCLUDE_PATH=$HOST_INC_PATH;
@@ -275,7 +249,7 @@ then
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
-    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-gold --enable-ld=default --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --disable-bootstrap --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --disable-libquadmath --disable-libatomic --disable-libgomp --enable-libsanitizer --enable-silent-rules --enable-static --enable-initfini-array --enable-plugins --with-gold-version=android >> $MAKE_LOG 2>&1;
+    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&aarch64-linux-android-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-gold --enable-ld=default --enable-plugins --disable-option-checking --disable-bootstrap --disable-libmudflap --disable-libquadmath --enable-libsanitizer --enable-initfini-array "--enable-eh-frame-hdr-for-static" --enable-fix-cortex-a53-835769 --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --with-python --with-gnu-ld --with-gnu-as --disable-werror --with-bugurl=mailto:sabermod.team@gmail.com --enable-silent-rules --enable-plugins --with-gold-version=android --enable-static >> $MAKE_LOG 2>&1;
 
     export SET_TARGET_BUILD=GCC;
 
@@ -288,6 +262,9 @@ then
     # Did we make it?
     if test -f $GCC_INSTALLED && test -f $LIB_GCC;
     then
+
+        # Install android specific files
+        bash $SMMAKEARM;
 
         # Cleanup
         rm -rf $SYSROOT_DEST_PATH;
@@ -303,12 +280,6 @@ then
         do
             rm $cmake;
         done;
-
-        # Install libgomp prebuilt libs
-        cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.x/lib/libgomp.a $HOST_LIB_PATH/libgomp.a;
-        cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.x/lib/libgomp-plugin-host_nonshm.a $HOST_LIB_PATH/libgomp-plugin-host_nonshm.a;
-        cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.x/lib/libgomp.spec $HOST_LIB_PATH/libgomp.spec;
-        cp $TOOLCHAIN_ROOT_SYMBOLIC/prebuilts/arm/gcc-$SET_TARGET_GCC_MAJOR.x/include/omp.h $HOST_INC_PATH/omp.h;
 
         # Create VERSION and GCC-CONFIG files
         # With these the android ROM sabermod-vendor will no longer

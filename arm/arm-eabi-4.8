@@ -38,7 +38,7 @@ function showHelpAndExit {
 }
 
 # Check twice to see if CORTEX is already defined.
-if [ ! -n "$CORTEX" ];
+if [ ! "$CORTEX" ];
 then
     
     # Grab any help or cortex command-line instructions
@@ -47,28 +47,31 @@ then
 fi;
 
 
-if [ ! -n "$CORTEX" ];
+if [ ! "$CORTEX" ];
 then
-    export CORTEX_FLAGS="";
+    unset CORTEX_FLAGS;
 fi;
 
-case $CORTEX in
--h|--help|h|help)
-        showHelpAndExit;
-        ;;
-a7)
-        export CORTEX_FLAGS="--with-tune=cortex-a7";
-        ;;
-a9)
-        export CORTEX_FLAGS="--with-tune=cortex-a9";
-        ;;
-a15)
-        export CORTEX_FLAGS="--with-tune=cortex-a15";
-        ;;
-esac
+if [ "$CORTEX" ];
+then
+    case $CORTEX in
+    -h|--help|h|help)
+            showHelpAndExit;
+            ;;
+    a7)
+            export CORTEX_FLAGS="--with-tune=cortex-a7";
+            ;;
+    a9)
+            export CORTEX_FLAGS="--with-tune=cortex-a9";
+            ;;
+    a15)
+            export CORTEX_FLAGS="--with-tune=cortex-a15";
+            ;;
+    esac
+fi;
 
 # Check twice to see if NEON is already defined.
-if [ ! -n "$NEON" ];
+if [ ! "$NEON" ];
 then
     
     # Grab any neon command-line instructions
@@ -77,16 +80,19 @@ then
 fi;
 
 
-if [ ! -n "$NEON" ];
+if [ ! "$NEON" ];
 then
     export NEON_FLAGS="--with-fpu=neon";
 fi
 
-case $NEON in
-vfpv4)
-        export NEON_FLAGS="--with-fpu=neon-vfpv4";
-        ;;
-esac
+if [ "$NEON" ];
+then
+    case $NEON in
+    vfpv4)
+            export NEON_FLAGS="--with-fpu=neon-vfpv4";
+            ;;
+    esac
+fi;
 
 # Some predefined configurations
 export SET_GCC_VERSION=4.8.5;
@@ -97,10 +103,6 @@ export SET_ISL_VERSION=0.15;
 export SET_HOST_BUILD=x86_64-linux-gnu;
 export SET_TARGET=arm-linux-gnueabi;
 export SET_TARGET_GCC=arm-eabi-gcc
-export SET_TARGET_GCC_LIB_PATH="lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod";
-export TARGET_CLOOG_LIB_VERSION=4.0.0;
-export TARGET_MPFR_LIB_VERSION=6.0.0;
-export TARGET_GMP_LIB_VERSION=10.2.0;
 export GCC_COLORS='error=01;31:warning=01;35:note=01;36:caret=01;32:locus=01:quote=01';
 export SABERMOD_BUILD_ARCH="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )";
 export ENABLE_O3="-O3";
@@ -110,7 +112,7 @@ export libgomp_cv_have_attribute_visibility=yes;
 
 # Attempt to speed up compilation by linking everything to /tmp filesystem
 # Also find toolchain root
-if [ -d /tmp/sm-tc ];
+if test -d /tmp/sm-tc;
 then
     rm -rf /tmp/sm-tc;
 fi;
@@ -158,7 +160,7 @@ fi;
 export MAKE_LOG=$LOG_PATH/$SET_TARGET-$SET_TARGET_GCC_MAJOR-$SET_TARGET_GCC_MINOR.log;
 
 # Make a clean build
-if [ -e Makefile ];
+if test -f Makefile;
 then
     echo "";
     echo "";
@@ -176,7 +178,7 @@ done;
 
 export TOOLCHAIN_PREFIX_PATH=~/tmp/$SET_TARGET-$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR;
 
-if [ -d "$TOOLCHAIN_PREFIX_PATH" ];
+if test -d $TOOLCHAIN_PREFIX_PATH;
 then
     rm -rf $TOOLCHAIN_PREFIX_PATH;
     mkdir -p $TOOLCHAIN_PREFIX_PATH;
@@ -189,9 +191,9 @@ export HOST_PREFIX_PATH=$TOOLCHAIN_PREFIX_PATH;
 export HOST_LIB_PATH=$HOST_PREFIX_PATH/lib;
 export HOST_INC_PATH=$HOST_PREFIX_PATH/include;
 export HOST_PREFIX=--prefix=$HOST_PREFIX_PATH;
-export CLOOG_INSTALLED=$HOST_LIB_PATH/libcloog-isl.so.$TARGET_CLOOG_LIB_VERSION;
-export MPFR_INSTALLED=$HOST_LIB_PATH/libmpfr.so.$TARGET_MPFR_LIB_VERSION;
-export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.so.$TARGET_GMP_LIB_VERSION;
+export CLOOG_INSTALLED=$HOST_LIB_PATH/libcloog-isl.a;
+export MPFR_INSTALLED=$HOST_LIB_PATH/libmpfr.a;
+export GMP_INSTALLED=$HOST_LIB_PATH/libgmp.a;
 
 # Sabermod build bot scripts.  Handles building, and build error checking.
 export SMBUILD_BOT_PATH=$TOOLCHAIN_ROOT_SYMBOLIC/smbuild/sm-build-bot;
@@ -205,7 +207,7 @@ export SET_TARGET_BUILD=CLOOG;
 bash $SMBUILD;
 
 # Is CLOOG Installed?
-if [ -e $CLOOG_INSTALLED ];
+if test -f $CLOOG_INSTALLED;
 then
     export CLOOG_INSTALLED=yes;
     bash $SMSUCCESS;
@@ -219,7 +221,7 @@ export SET_TARGET_BUILD=MPFR;
 bash $SMBUILD;
 
 # Is MPFR Installed?
-if [ -e $MPFR_INSTALLED ];
+if test -f $MPFR_INSTALLED;
 then
     export MPFR_INSTALLED=yes;
     bash $SMSUCCESS;
@@ -233,7 +235,7 @@ export SET_TARGET_BUILD=GMP;
 bash $SMBUILD;
 
 # Is GMP Installed?
-if [ -e $GMP_INSTALLED ];
+if test -f $GMP_INSTALLED ;
 then
     export GMP_INSTALLED=yes;
     bash $SMSUCCESS;
@@ -247,8 +249,6 @@ cd $BUILD_PATH;
 if [ $CLOOG_INSTALLED = "yes" ] && [ $MPFR_INSTALLED = "yes" ] && [ $GMP_INSTALLED = "yes" ];
 then
 
-    # Make a system link for older version of libisl using the newer version for older systems
-    cd $HOST_LIB_PATH && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.10 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.0 && ln -s libisl.so.$TARGET_ISL_LIB_VERSION libisl.so.13.1.1 && cd $BUILD_PATH;
     sleep 5;
 
     echo -e "${CLR_BLD_BLU}Preparing sabermod toolchain sources ...${CLR_RST}";
@@ -277,7 +277,7 @@ then
     export TOOLCHAIN_PREFIX=--prefix=$TOOLCHAIN_PREFIX_PATH;
 
     # GCC Build Configuration
-    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-gold --enable-ld=default --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --disable-bootstrap --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --disable-libquadmath --disable-libatomic --disable-libgomp --enable-silent-rules --enable-shared --enable-static --enable-initfini-array --enable-plugins >> $MAKE_LOG 2>&1;
+    ./configure $TOOLCHAIN_PREFIX $SYSROOT --host=$SET_HOST_BUILD --build=$SET_HOST_BUILD --target=$SET_TARGET --program-transform-name='s&^&arm-eabi-&' --with-gcc-version=SaberMod --with-binutils-version=android --with-gmp-version=gnu --with-mpfr-version=gnu --with-mpc-version=gnu --with-cloog-version=$SET_CLOOG_VERSION --with-isl-version=$SET_ISL_VERSION --enable-graphite=yes --enable-gold --enable-ld=default --disable-option-checking --with-host-libstdcxx='-static-libgcc -Wl,-Bstatic,-lstdc++,-Bdynamic -lm' --disable-bootstrap --with-gxx-include-dir=$SYSROOT_DEST_PATH/c++ --disable-libquadmath --disable-libatomic --disable-libgomp --enable-silent-rules --enable-static --enable-initfini-array --enable-plugins --with-gold-version=android >> $MAKE_LOG 2>&1;
 
     export SET_TARGET_BUILD=GCC;
 
@@ -285,11 +285,10 @@ then
 
     export GCC_INSTALLED=$TOOLCHAIN_PREFIX_PATH/bin/$SET_TARGET_GCC;
 
-    FIND_LIB_GCC=`find $TOOLCHAIN_PREFIX_PATH -name libgcc.a`;
-    FIND_LIB_GCC=$FIND_LIB_GCC;
+    LIB_GCC="$TOOLCHAIN_PREFIX_PATH/lib/gcc/$SET_TARGET/$SET_TARGET_GCC_MAJOR.$SET_TARGET_GCC_MINOR.x-sabermod/libgcc.a";
 
     # Did we make it?
-    if [ -e $GCC_INSTALLED ] && [ -n "$FIND_LIB_GCC" ];
+    if test -f $GCC_INSTALLED && test -f $LIB_GCC;
     then
 
         # Cleanup
